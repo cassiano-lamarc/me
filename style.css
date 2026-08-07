@@ -124,14 +124,52 @@ button {
   padding: 112px 0;
 }
 
-.hero {
+.section.hero {
+  position: relative;
+  isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
   min-height: 100vh;
-  gap: 28px;
+  padding-right: max(16px, calc((100% - 1180px) / 2));
+  padding-left: max(16px, calc((100% - 1180px) / 2));
   padding-top: 120px;
   padding-bottom: 72px;
+  background: #020617;
+  overflow: hidden;
+}
+
+.hero::before {
+  position: absolute;
+  z-index: -2;
+  inset: 0 0 0 auto;
+  width: 72%;
+  background: url("assets/profile-placeholder.jpeg") center 35% / cover no-repeat;
+  content: "";
+}
+
+.hero::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #020617 0%, rgba(2, 6, 23, 0.98) 32%, rgba(2, 6, 23, 0.7) 58%, rgba(2, 6, 23, 0.18) 100%),
+    linear-gradient(0deg, rgba(2, 6, 23, 0.54), transparent 45%);
+  content: "";
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 720px;
+}
+
+.hero-content.reveal {
+  opacity: 1;
+  transform: none;
 }
 
 .eyebrow {
@@ -244,42 +282,6 @@ h1 {
   border-bottom: 1px solid rgba(56, 189, 248, 0.4);
   color: #bae6fd;
   font-weight: 700;
-}
-
-.hero-visual {
-  position: relative;
-  min-height: 640px;
-  display: grid;
-  place-items: end;
-  isolation: isolate;
-}
-
-.hero-visual::before {
-  position: absolute;
-  right: 6%;
-  bottom: 8%;
-  z-index: -1;
-  width: min(42vw, 540px);
-  height: min(42vw, 540px);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.28) 0%,
-    rgba(34, 211, 238, 0.14) 40%,
-    transparent 74%
-  );
-  filter: blur(78px);
-  content: "";
-}
-
-.hero-portrait {
-  display: block;
-  width: clamp(520px, 43vw, 750px);
-  height: auto;
-  margin-right: max(-8vw, -96px);
-  object-fit: cover;
-  object-position: center bottom;
-  filter: drop-shadow(0 28px 44px rgba(2, 6, 23, 0.56));
 }
 
 .section-heading {
@@ -710,19 +712,8 @@ h1 {
   .landing-pages-preview { display: none; }
 
   .hero {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.7fr);
     min-height: auto;
     padding-top: 116px;
-    gap: 28px;
-  }
-
-  .hero-visual {
-    min-height: 500px;
-  }
-
-  .hero-portrait {
-    width: clamp(440px, 48vw, 560px);
-    margin-right: -120px;
   }
 
   .experience-layout {
@@ -737,11 +728,21 @@ h1 {
 
 @media (max-width: 768px) {
   .hero {
-    grid-template-columns: 1fr;
+    min-height: 100svh;
   }
 
-  .hero-visual {
-    display: none;
+  .hero::before {
+    inset: 0;
+    width: 100%;
+    background-position: 30% center;
+  }
+
+  .hero::after {
+    background: linear-gradient(90deg, rgba(2, 6, 23, 0.96) 0%, rgba(2, 6, 23, 0.78) 58%, rgba(2, 6, 23, 0.38) 100%), linear-gradient(0deg, #020617 0%, transparent 48%, rgba(2, 6, 23, 0.28));
+  }
+
+  .hero-content {
+    max-width: 640px;
   }
 }
 
