@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Protótipo demonstrativo de landing page para campanha política fictícia.">
+  <meta property="og:title" content="João Silva — Um novo olhar para nossa cidade">
+  <meta property="og:description" content="Demonstração visual de uma campanha próxima, moderna e transparente.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/candidato.svg">
+  <title>João Silva | Protótipo demonstrativo</title>
+  <link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../shared/css/base.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- PERSONALIZE: nome, cidade, textos e links neste HTML; cores no início de css/style.css; WhatsApp no início de js/script.js. Todo conteúdo atual é fictício. -->
+  <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+  <div class="demo-label">Protótipo demonstrativo</div>
+  <header class="site-header" data-header>
+    <div class="container nav-wrap">
+      <a class="candidate-brand" href="#inicio" aria-label="João Silva — início"><span>João</span> Silva<small>Um novo olhar</small></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menu" data-menu-toggle><span></span><span></span><span></span></button>
+      <nav class="main-nav" id="main-nav" aria-label="Navegação principal" data-nav>
+        <a href="#inicio">Início</a><a href="#sobre">Sobre</a><a href="#propostas">Propostas</a><a href="#compromissos">Prioridades</a><a href="#contato">Contato</a>
+        <a class="button button-small" href="#propostas">Conheça as propostas</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="hero" id="inicio">
+      <div class="hero-shape" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span></span> Um novo olhar para nossa cidade</p>
+          <h1>Experiência para cuidar.<br><em>Coragem para transformar.</em></h1>
+          <p class="hero-lead">Uma proposta construída com diálogo, proximidade e compromisso com uma cidade mais humana para todas as pessoas.</p>
+          <div class="actions"><a class="button" href="#propostas">Conheça minhas propostas</a><a class="button button-ghost" data-whatsapp href="#">Fale com nossa equipe</a></div>
+          <p class="prototype-note">Nome, imagem e conteúdo fictícios para demonstração visual.</p>
+        </div>
+        <div class="hero-portrait reveal">
+          <div class="portrait-frame"><img src="assets/candidato.svg" width="720" height="850" alt="Retrato ilustrativo de João Silva, personagem fictício"></div>
+          <div class="portrait-caption"><strong>João Silva</strong><span>Pronto para ouvir. Preparado para fazer.</span></div>
+        </div>
+      </div>
+      <a class="scroll-cue" href="#sobre"><span>Conheça nossa visão</span><i aria-hidden="true">↓</i></a>
+    </section>
+
+    <section class="section about" id="sobre">
+      <div class="container split-grid">
+        <div class="about-media reveal"><img src="assets/comunidade.svg" width="900" height="650" loading="lazy" alt="Ilustração demonstrativa de encontro com a comunidade"><span class="media-tag">Perto das pessoas</span></div>
+        <div class="section-copy reveal"><p class="eyebrow dark"><span></span> Uma história de proximidade</p><h2>Quem é <em>João Silva?</em></h2><p>João é um personagem fictício criado para mostrar como uma trajetória de compromisso com a comunidade pode ganhar vida em uma presença digital clara e acolhedora.</p><p>Este espaço deve ser personalizado com uma história verdadeira: raízes, valores e motivações, sempre com informações verificadas e autorizadas pelo cliente.</p><blockquote>“A boa política começa quando a gente escuta de verdade.”<small>— Mensagem demonstrativa</small></blockquote></div>
+      </div>
+    </section>
+
+    <section class="section proposals" id="propostas">
+      <div class="container"><div class="section-heading reveal"><div><p class="eyebrow dark"><span></span> Ideias que cuidam do presente</p><h2>Propostas para <em>avançar juntos</em></h2></div><p>Diretrizes ilustrativas que demonstram como organizar prioridades de maneira simples e acessível.</p></div>
+        <div class="proposal-grid">
+          <article class="proposal-card reveal"><span class="icon">♡</span><p>01</p><h3>Saúde perto de você</h3><p>Fortalecer o cuidado próximo e tornar o atendimento mais humano e acessível.</p><a href="#contato">Quero conversar <span>→</span></a></article>
+          <article class="proposal-card reveal"><span class="icon">◇</span><p>02</p><h3>Educação que inspira</h3><p>Valorizar a comunidade escolar e criar caminhos para aprender e crescer.</p><a href="#contato">Quero conversar <span>→</span></a></article>
+          <article class="proposal-card reveal"><span class="icon">↗</span><p>03</p><h3>Emprego e renda</h3><p>Aproximar oportunidades, capacitação e quem deseja empreender na cidade.</p><a href="#contato">Quero conversar <span>→</span></a></article>
+          <article class="proposal-card reveal"><span class="icon">⌂</span><p>04</p><h3>Segurança cidadã</h3><p>Cuidar dos espaços públicos com prevenção, presença e ações integradas.</p><a href="#contato">Quero conversar <span>→</span></a></article>
+          <article class="proposal-card reveal"><span class="icon">↔</span><p>05</p><h3>Mobilidade eficiente</h3><p>Planejar deslocamentos mais seguros, fluidos e acessíveis para todos.</p><a href="#contato">Quero conversar <span>→</span></a></article>
+          <article class="proposal-card reveal"><span class="icon">☆</span><p>06</p><h3>Esporte e lazer</h3><p>Estimular convivência, bem-estar e ocupação positiva dos bairros.</p><a href="#contato">Quero conversar <span>→</span></a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="vision"><div class="container vision-inner reveal"><p class="eyebrow"><span></span> Nossa cidade, nosso futuro</p><h2>Uma cidade melhor se constrói <em>ouvindo quem vive nela</em> todos os dias.</h2><a class="button button-light" data-whatsapp href="#">Faça parte dessa conversa</a></div></section>
+
+    <section class="section commitments" id="compromissos"><div class="container"><div class="section-heading compact reveal"><div><p class="eyebrow dark"><span></span> Nosso jeito de fazer</p><h2>Compromissos que <em>guiam cada decisão</em></h2></div></div>
+      <div class="commitment-list">
+        <article class="reveal"><span>01</span><div><h3>Ouvir antes de decidir</h3><p>Diálogo aberto para compreender as necessidades reais de cada região.</p></div></article>
+        <article class="reveal"><span>02</span><div><h3>Transparência sempre</h3><p>Informação clara e prestação de contas acessível para toda a população.</p></div></article>
+        <article class="reveal"><span>03</span><div><h3>Presença nos bairros</h3><p>Uma atuação próxima, conectada ao cotidiano e às diferentes comunidades.</p></div></article>
+        <article class="reveal"><span>04</span><div><h3>Foco nas pessoas</h3><p>Planejamento responsável para transformar boas ideias em cuidado concreto.</p></div></article>
+      </div></div>
+    </section>
+
+    <section class="section streets"><div class="container"><div class="section-heading reveal"><div><p class="eyebrow dark"><span></span> Campanha nas ruas</p><h2>Uma jornada feita de <em>encontros</em></h2></div><p>Galeria preparada para receber registros reais e autorizados de visitas, conversas e ações.</p></div>
+      <div class="gallery"><figure class="reveal"><img src="assets/ruas-1.svg" width="640" height="480" loading="lazy" alt="Placeholder de encontro comunitário"><figcaption>Ouvindo cada comunidade</figcaption></figure><figure class="reveal"><img src="assets/ruas-2.svg" width="640" height="480" loading="lazy" alt="Placeholder de conversa com moradores"><figcaption>Diálogo que aproxima</figcaption></figure><figure class="reveal"><img src="assets/ruas-3.svg" width="640" height="480" loading="lazy" alt="Placeholder de visita a bairro"><figcaption>Presença em todos os bairros</figcaption></figure></div>
+    </div></section>
+
+    <section class="contact" id="contato"><div class="container contact-grid"><div class="reveal"><p class="eyebrow"><span></span> Vamos conversar?</p><h2>Sua voz faz parte <em>dessa construção.</em></h2><p>Acompanhe os canais demonstrativos ou fale com a equipe pelo WhatsApp.</p></div><div class="contact-actions reveal"><a class="button button-accent" data-whatsapp href="#">Chamar no WhatsApp</a><div class="socials"><a href="#" data-placeholder-link>Instagram</a><a href="#" data-placeholder-link>Facebook</a><a href="mailto:contato@exemplo.com">E-mail</a></div><small>Links e contatos são placeholders de demonstração.</small></div></div></section>
+  </main>
+
+  <footer><div class="container footer-grid"><a class="candidate-brand footer-brand" href="#inicio"><span>João</span> Silva<small>Identidade fictícia</small></a><nav aria-label="Navegação do rodapé"><a href="#sobre">Sobre</a><a href="#propostas">Propostas</a><a href="#contato">Contato</a></nav><div class="footer-meta"><p>Protótipo demonstrativo. Não representa candidato, partido ou campanha real.</p><a href="https://cassianolamarc.com.br/" target="_blank" rel="noopener noreferrer">Desenvolvido por Lamarc Tech ↗</a></div></div></footer>
+  <a class="whatsapp-float" data-whatsapp href="#" aria-label="Falar com a equipe pelo WhatsApp"><span aria-hidden="true">✦</span><b>WhatsApp</b></a>
+  <script src="js/script.js" defer></script>
+</body>
+</html>
