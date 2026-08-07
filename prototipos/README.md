@@ -17,7 +17,7 @@ Acesse `http://localhost:8000/prototipos/` ou diretamente `http://localhost:8000
 1. Copie a pasta de um protótipo apropriado, como `politico/`, para `refrigeracao/`, `escola/` ou outro nome curto, sem espaços e em minúsculas.
 2. Mantenha `index.html`, `css/`, `js/` e `assets/` dentro da pasta do nicho.
 3. Reutilize de `shared/` apenas o que for realmente comum. Estilos específicos devem permanecer no nicho.
-4. Não adicione o novo nicho à página `prototipos/index.html`: envie ao prospect apenas sua URL direta.
+4. Adicione um card à vitrine em `prototipos/index.html` somente depois que a rota do novo nicho estiver implementada e validada.
 
 Cada pasta gera uma URL limpa: `prototipos/politico/` corresponde a `https://cassianolamarc.com.br/prototipos/politico/`; `prototipos/refrigeracao/` corresponderá a `https://cassianolamarc.com.br/prototipos/refrigeracao/`; e `prototipos/escola/` a `https://cassianolamarc.com.br/prototipos/escola/`.
 

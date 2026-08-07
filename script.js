@@ -53,6 +53,12 @@ const translations = {
     skillsTitle: "Stack, arquitetura e inovação",
     workEyebrow: "Locais aceitáveis de trabalho",
     workTitle: "Disponibilidade",
+    landingEyebrow: "Soluções digitais para negócios",
+    landingTitle: "Landing Pages profissionais",
+    landingText:
+      "Sites rápidos, responsivos e pensados para apresentar seu negócio com profissionalismo, gerar confiança e transformar visitantes em novos contatos e clientes.",
+    landingCta: "Ver protótipos de Landing Pages",
+    landingContact: "Solicitar orçamento",
     contactEyebrow: "Contato",
     contactTitle: "Contato",
     contactText:
@@ -195,6 +201,12 @@ const translations = {
     skillsTitle: "Stack, architecture, and innovation",
     workEyebrow: "Acceptable work locations",
     workTitle: "Availability",
+    landingEyebrow: "Digital solutions for businesses",
+    landingTitle: "Professional Landing Pages",
+    landingText:
+      "Fast, responsive websites designed to present your business professionally, build trust, and turn visitors into new contacts and customers.",
+    landingCta: "View Landing Page prototypes",
+    landingContact: "Request a quote",
     contactEyebrow: "Contact",
     contactTitle: "Contact",
     contactText:
