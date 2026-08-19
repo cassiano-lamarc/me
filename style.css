@@ -746,7 +746,47 @@ h1 {
   }
 }
 
+.whatsapp-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 1000;
+  display: grid;
+  width: 60px;
+  height: 60px;
+  place-items: center;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.whatsapp-fab:hover {
+  background: #20bd5a;
+  box-shadow: 0 10px 30px rgba(37, 211, 102, 0.32);
+  transform: translateY(-3px) scale(1.04);
+}
+
+.whatsapp-fab:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.whatsapp-fab svg {
+  width: 32px;
+  height: 32px;
+  fill: #fff;
+}
+
 @media (max-width: 560px) {
+  .whatsapp-fab {
+    right: 18px;
+    bottom: 18px;
+    width: 56px;
+    height: 56px;
+  }
+
   .hero-actions .button,
   .social-links a,
   .contact-links a {
