@@ -518,6 +518,7 @@ document.querySelectorAll(".reveal").forEach((element) => {
 languageToggle.addEventListener("click", () => {
   currentLanguage = currentLanguage === "pt" ? "en" : "pt";
   applyTranslations(currentLanguage);
+  window.dispatchEvent(new Event("typing-language-change"));
 });
 
 previousExperienceButton.addEventListener("click", () => {
