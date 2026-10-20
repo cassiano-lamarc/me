@@ -31,25 +31,44 @@ try{
       await page.getByRole('button',{name:i===count-1?'Ver resultado':'Continuar'}).click();
     }
     assert.equal(new Set(order).size,count);assert.equal(await page.locator('.review-item').count(),count);
-    const sharing=page.locator('#sharing');assert.deepEqual(await sharing.locator('button').allTextContents(),['Compartilhar nas redes','Baixar imagem']);
+    assert.equal(await page.locator('.comparison-table tbody tr').count(),count);
+    assert.equal(await page.locator('.candidate-grid .portrait').count(),2);
+    assert.equal(await page.locator('.percent').count(),0);
+    assert(!(await page.locator('h1').innerText()).includes('coincidências'));
+    const expectedCoverage=await page.evaluate(async level=>{const {proposals,levels}=await import('/entre-pautas/data.js');const {compareDocuments}=await import('/entre-pautas/score.js');const {coverageText}=await import('/entre-pautas/report.js');return coverageText(compareDocuments({questionOrder:levels[level].ids,answersByQuestionId:{}},proposals));},level);
+    assert.equal(await page.locator('.lead').innerText(),expectedCoverage);
+    await page.screenshot({path:path.join(out,`consulta-${level}.png`)});
+    const sharing=page.locator('#sharing');assert.deepEqual(await sharing.locator('button').allTextContents(),['Compartilhar nas redes','Baixar imagem','Baixar TXT','Baixar imagens completas']);
     const shareBox=await sharing.boundingBox(),expectBox=await page.locator('#expectation').boundingBox();assert(expectBox.y>shareBox.y+shareBox.height);
-    assert.equal(await page.getByRole('button',{name:/Copiar|TXT|todas as respostas|somente o link|imagem pronta/}).count(),0);
-    await page.locator('#expectation').selectOption({label:'Eu estava em dúvida.'});
+    const textDownload=page.waitForEvent('download');await page.locator('[data-action=txt]').click();
+    const txt=await textDownload;await txt.saveAs(path.join(out,`comparacao-${level}.txt`));
+    const report=await readFile(path.join(out,`comparacao-${level}.txt`),'utf8');
+    assert(report.includes('Posição não confirmada'));assert(!report.includes('Mais coincidências'));assert(!report.includes('respostas elegíveis'));
+    for(const [i,title] of order.entries())assert(report.includes(`${i+1}. ${title}`));
+    const imageDownload=page.waitForEvent('download',{timeout:120000});await page.locator('[data-action=full-images]').click();await(await imageDownload).saveAs(path.join(out,`comparacao-${level}.zip`));
+    const fullDraws=await page.evaluate(()=>window.__draws);assert(fullDraws.some(d=>d.text.includes('Fonte:')));assert(fullDraws.some(d=>d.text.includes('Posição não confirmada')));
+    const imageText=fullDraws.map(d=>d.text).join('').replaceAll(/\s/g,'');
+    for(const [i,title] of order.entries())assert(imageText.includes(`${i+1}. ${title}`.replaceAll(/\s/g,'')));
+    assert(fullDraws.every(d=>d.x>=72&&d.x+d.width<=1009&&d.y+Number(d.font.match(/(\d+)px/)[1])<=1920));
+    await page.evaluate(()=>{window.__draws=[];});
+    await page.locator('#expectation').selectOption({label:'Preciso consultar as fontes com mais detalhes.'});
     const download=page.waitForEvent('download');await page.getByRole('button',{name:'Baixar imagem',exact:true}).click();await(await download).saveAs(path.join(out,`resultado-${level}.png`));await page.locator('#social-preview img').waitFor();
-    const draws=await page.evaluate(()=>window.__draws);assert(draws.some(d=>d.text.includes('@cassianolamarc')));assert(draws.some(d=>d.text.includes('cassianolamarc.com.br')));assert(!draws.some(d=>d.text.includes('Eu estava em dúvida.')));
-    assert(draws.every(d=>d.x>=72&&d.x+d.width<=1009&&d.y+Number(d.font.match(/(\d+)px/)[1])<=1920));assert.equal(await sharing.locator('button').count(),2);
-    await page.getByRole('button',{name:'Compartilhar nas redes',exact:true}).click();assert.equal(await sharing.locator('button').count(),2);
+    const draws=await page.evaluate(()=>window.__draws);assert(draws.some(d=>d.text.includes('@cassianolamarc')));assert(draws.some(d=>d.text.includes('cassianolamarc.com.br')));assert(!draws.some(d=>d.text.includes('Preciso consultar as fontes com mais detalhes.')));
+    assert(draws.map(d=>d.text).join('').replaceAll(/\s/g,'').includes(expectedCoverage.replaceAll(/\s/g,'')));
+    assert(draws.every(d=>d.x>=72&&d.x+d.width<=1009&&d.y+Number(d.font.match(/(\d+)px/)[1])<=1920));assert.equal(await sharing.locator('button').count(),4);
+    await page.getByRole('button',{name:'Compartilhar nas redes',exact:true}).click();assert.equal(await sharing.locator('button').count(),4);
     await page.evaluate(()=>{
       Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>true});
       Object.defineProperty(navigator,'share',{configurable:true,value:async data=>{window.__shared=data.files.length;throw new DOMException('Cancelado','AbortError');}});
     });
     await page.getByRole('button',{name:'Compartilhar nas redes',exact:true}).click();await page.getByText('Compartilhamento cancelado. Suas respostas foram mantidas.',{exact:true}).waitFor();assert.equal(await page.evaluate(()=>window.__shared),1);
-    await page.evaluate(()=>{Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>false});});await page.getByRole('button',{name:'Compartilhar nas redes',exact:true}).click();assert.equal(await sharing.locator('button').count(),2);
+    await page.evaluate(()=>{Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>false});});await page.getByRole('button',{name:'Compartilhar nas redes',exact:true}).click();assert.equal(await sharing.locator('button').count(),4);
     for(const width of [320,430,1280]){await page.setViewportSize({width,height:900});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+    await page.locator('#review').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,`tabela-${level}-desktop.png`)});
     await page.setViewportSize({width:375,height:812});await sharing.screenshot({path:path.join(out,`acoes-${level}.png`)});
     await page.getByRole('button',{name:'Revisar desde o início',exact:true}).click();assert.equal(await page.locator('h1').innerText(),order[0]);assert.equal(await page.getByRole('radio',{name:'A favor',exact:false}).getAttribute('aria-checked'),'true');
     await page.getByRole('button',{name:'Começar outra pesquisa',exact:true}).click();await page.getByRole('button',{name:'Apagar respostas e começar outra',exact:true}).click();
-    console.log(`OK ${level}: ${count} respostas, duas ações, PNG com site/Instagram, expectativa abaixo, share/fallback.`);
+    console.log(`OK ${level}: ${count} linhas, cobertura, TXT, PNG, ZIP completo, revisão e compartilhamento.`);
   }
   assert.equal(adRequests,1);assert.deepEqual(errors,[]);assert.deepEqual(external,[]);assert.deepEqual(await page.evaluate(()=>[document.cookie,localStorage.length,sessionStorage.length]),['',0,0]);
   console.log('Browser OK: navegação, foco, revisão, mobile/desktop e privacidade.');
