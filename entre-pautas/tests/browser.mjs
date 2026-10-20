@@ -34,6 +34,9 @@ try{
     assert.equal(await page.locator('.comparison-table tbody tr').count(),count);
     assert.equal(await page.locator('.candidate-grid .portrait').count(),2);
     assert.equal(await page.locator('.percent').count(),0);
+    const expectedGroupPercent=await page.evaluate(async level=>{const {proposals,levels}=await import('/entre-pautas/data.js');const {compareDocuments}=await import('/entre-pautas/score.js');return compareDocuments({questionOrder:levels[level].ids,answersByQuestionId:{}},proposals).byGroup.map(g=>g.percent+'%');},level);
+    assert.deepEqual(await page.locator('.coverage-percent').allTextContents(),expectedGroupPercent);
+    assert.equal(await page.locator('.coverage-label').first().innerText(),'Cobertura documental');
     const accordion=page.locator('#review');
     assert.equal(await accordion.evaluate(el=>el.tagName),'DETAILS');
     assert.equal(await accordion.getAttribute('open'),null);

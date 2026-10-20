@@ -1,7 +1,7 @@
 import { candidates, CANONICAL_URL } from './candidates.js';
 import { levels, proposalById, answerLabel } from './data.js';
 import { compareDocuments } from './score.js';
-import { resultTitle, dateLabel, coverageText, rowText, groupContext } from './report.js';
+import { resultTitle, dateLabel, coverageText, rowText, groupContext, groupCoverageText } from './report.js';
 const W=1080,H=1920,P=72,CONTENT=W-P*2,BOTTOM=1685;
 const colors = { paper:'#f6f7f2', ink:'#172f2a', muted:'#53663f', line:'#dce2d9', lime:'#d8ed9c' };
 let cache = null;
@@ -57,7 +57,9 @@ function resultHeader(ctx,comparison,images,start=152,compact=false) {
  let y=paragraph(ctx,resultTitle(),P,start,CONTENT,compact?44:58,700),width=CONTENT/2;
  candidates.forEach((c,i)=>{portrait(ctx,images[i],P+i*width,y+22,compact?100:150,compact?112:168,c.initials);paragraph(ctx,c.name,P+i*width+(compact?118:170),y+30,width-(compact?130:182),compact?28:32,700);});
  y+=compact?155:210;
- return paragraph(ctx,coverageText(comparison),P,y,CONTENT,compact?28:36,600)+28;
+ y=paragraph(ctx,coverageText(comparison),P,y,CONTENT,compact?28:36,600)+16;
+ for(const g of comparison.byGroup)y=paragraph(ctx,groupCoverageText(g),P,y,CONTENT,compact?24:28,600)+10;
+ return y+18;
 }
 function blobFrom(c) { return new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error('Não foi possível gerar o PNG.')),'image/png')); }
 export async function socialImage(session,proposals) {

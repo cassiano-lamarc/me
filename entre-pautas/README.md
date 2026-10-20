@@ -2,9 +2,11 @@
 
 Aplicação estática em /entre-pautas/, integrada ao site existente. HTML, CSS e módulos JavaScript, sem build ou servidor de aplicação. Hospedagem GitHub Pages e domínio preservados.
 
-A ferramenta apresenta propostas, a resposta do visitante e registros públicos de Lula e Flávio Bolsonaro, lado a lado, com fontes, datas e contexto. Não calcula afinidade, coincidências, percentuais ou vencedor e não recomenda voto. A cobertura conta perguntas com documentos dos dois, de apenas um ou de nenhum, independentemente das respostas.
+A ferramenta apresenta propostas, a resposta do visitante e registros públicos de Lula e Flávio Bolsonaro, lado a lado, com fontes, datas e contexto. Não calcula afinidade, coincidências, percentuais de afinidade ou vencedor e não recomenda voto. A cobertura conta perguntas com documentos dos dois, de apenas um ou de nenhum, independentemente das respostas.
 
 A consulta foi organizada nos grupos “Lula e PT” e “Flávio Bolsonaro e PL”. A ordem é Lula → PT e Flávio → Jair → PL; cada documento mantém seu responsável identificado e as lacunas individuais continuam visíveis. Veja [GROUPS.md](GROUPS.md) para fontes, recortes, prioridades e cobertura atual dos grupos. Essa organização não transfere posições entre candidatos, familiares e partidos.
+
+A tela final, o TXT e as imagens exibem **percentuais de cobertura documental por grupo**: perguntas com algum registro contextualizado do grupo divididas pelo total de perguntas do nível, arredondadas ao inteiro mais próximo. A resposta do visitante não participa dessa conta. Sem perguntas, o percentual é “—”; perguntas sem documentação produzem 0% de cobertura. Isso não é percentual de afinidade.
 
 ## Executar e verificar
 

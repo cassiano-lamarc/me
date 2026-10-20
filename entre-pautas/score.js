@@ -16,5 +16,9 @@ export function compareDocuments(session, proposals) {
       return {candidate,entries,primaryAuthor:primary?.author||null,position:primary?.position||entries[0].position,confirmed:Boolean(primary)};
     })};
   });
-  return {total:rows.length,coverage,rows};
+  const byGroup=candidates.map(candidate=>{
+    const count=rows.filter(row=>row.records.find(r=>r.candidate.id===candidate.id).confirmed).length;
+    return {id:candidate.id,name:candidate.name,count,total:rows.length,percent:rows.length?Math.round(count/rows.length*100):null};
+  });
+  return {total:rows.length,coverage,byGroup,rows};
 }

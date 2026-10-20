@@ -29,7 +29,7 @@ test('cobertura separa dois, um e nenhum; respostas nunca produzem placar',()=>{
     const s=createSession(level),before=compareDocuments(s,proposals);
     for(const value of ['favor','against','depends','none']){
       for(const id of s.questionOrder)answer(s,id,value);
-      const c=compareDocuments(s,proposals);assert.deepEqual(c.coverage,before.coverage);
+      const c=compareDocuments(s,proposals);assert.deepEqual(c.coverage,before.coverage);assert.deepEqual(c.byGroup,before.byGroup);
       assert.equal(c.coverage.both+c.coverage.one+c.coverage.none,c.total);
       assert(c.rows.every(r=>r.answer===value));assert(!('leaders' in c));assert(!('results' in c));assert(!('denominator' in c));
     }
@@ -39,6 +39,14 @@ test('cobertura separa dois, um e nenhum; respostas nunca produzem placar',()=>{
   assert.deepEqual(compareDocuments(s,[{id:'x',positions:{}}]).coverage,{both:0,one:0,none:1});
   assert.deepEqual(compareDocuments({questionOrder:[],answersByQuestionId:{}},[]).coverage,{both:0,one:0,none:0});
   assert.throws(()=>compareDocuments(s,[]),/Proposta não encontrada/);
+});
+
+test('percentual de cobertura conta perguntas documentadas, incluindo base vazia',()=>{
+  const simple=compareDocuments(createSession('simple'),proposals);
+  assert.deepEqual(simple.byGroup.map(g=>[g.count,g.total,g.percent]),[[8,10,80],[3,10,30]]);
+  const empty=compareDocuments({questionOrder:[],answersByQuestionId:{}},[]);assert(empty.byGroup.every(g=>g.percent===null&&g.count===0));
+  const unknown=compareDocuments({questionOrder:['x'],answersByQuestionId:{x:'favor'}},[{id:'x',positions:{}}]);assert(unknown.byGroup.every(g=>g.percent===0&&g.count===0));
+  const report=textReport(createSession('simple'),proposals);assert(report.includes('80% de cobertura documental'));assert(report.includes('30% de cobertura documental'));
 });
 test('expectativa não altera cobertura e TXT contém todas as respostas, fontes e ordem efetiva',()=>{
   const s=createSession('complete',()=>.42);for(const id of s.questionOrder)answer(s,id,'favor');const before=compareDocuments(s,proposals);s.expectation='Eu estava em dúvida.';assert.deepEqual(compareDocuments(s,proposals),before);

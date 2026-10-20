@@ -4,8 +4,9 @@ import { compareDocuments, positionLabel, coverageLabel } from './score.js';
 export const dateLabel = session => new Date(session.createdAt).toLocaleString('pt-BR', { timeZone:'America/Sao_Paulo' });
 export const resultTitle = () => 'Propostas e registros públicos';
 export const groupContext = 'Consulta: Flávio → Jair → PL; Lula → PT. Cada documento mantém sua autoria e não comprova a posição dos demais.';
+export const groupCoverageText = g => g.name+': '+(g.percent===null?'—':g.percent+'%')+' de cobertura documental ('+g.count+' de '+g.total+' perguntas com registros).';
 export const coverageText = c => c.total+' perguntas: '+c.coverage.both+' com registros dos dois grupos, '+c.coverage.one+' de apenas um grupo e '+c.coverage.none+' sem registros de posição confirmados.';
-export function summaryText(session, proposals) { return [resultTitle(),'Grupos: Lula e PT; Flávio Bolsonaro e PL.',coverageText(compareDocuments(session,proposals)),groupContext,'Cobertura documental não mede apoio, afinidade ou intenção de voto.',CANONICAL_URL].join('\n'); }
+export function summaryText(session, proposals) { const c=compareDocuments(session,proposals);return [resultTitle(),'Grupos: Lula e PT; Flávio Bolsonaro e PL.',coverageText(c),...c.byGroup.map(groupCoverageText),groupContext,'Cobertura documental não mede apoio, afinidade ou intenção de voto.',CANONICAL_URL].join('\n'); }
 export function rowText(row,index) {
   const p=row.proposal,lines=[(index+1)+'. '+p.title,'Sua resposta: '+answerLabel(row.answer),coverageLabel(row.coverage),'Contexto da pergunta: '+p.conditions];
   for(const {candidate,entries,primaryAuthor} of row.records) {

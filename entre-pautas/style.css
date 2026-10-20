@@ -9,3 +9,4 @@ main.document-result{max-width:1200px}.document-result .candidate-grid{max-width
 .share-panel{background:#e7efda;border:2px solid var(--green)}.share-panel h2{margin-top:0}.share-panel .share-primary{flex-basis:100%;min-height:64px;font-size:19px;box-shadow:0 6px 16px #173e3626}.share-primary:hover{background:#24564b}.documents-accordion>summary{font-family:Manrope,system-ui,sans-serif;font-size:clamp(1rem,3vw,1.35rem);padding:6px 0}.documents-accordion .comparison-scroll{margin-bottom:0}@media(max-width:480px){.share-panel .share-primary{font-size:17px}}
 
 .actor-record{border-top:1px solid var(--line);padding-top:12px;margin-top:16px}.actor-record h3{font-size:15px;margin:0 0 8px}
+.coverage-label{font-size:13px;margin:12px 0 2px;font-weight:700}.coverage-percent{display:block;font:700 36px Manrope,system-ui,sans-serif}
