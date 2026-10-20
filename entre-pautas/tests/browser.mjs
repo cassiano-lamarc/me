@@ -12,7 +12,9 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const browser=await chromium.launch({headless:true,channel:process.env.PLAYWRIGHT_CHANNEL||'chrome'});
 try{
   const page=await browser.newPage({viewport:{width:375,height:812}}),errors=[],external=[];
-  page.on('pageerror',e=>errors.push(String(e)));page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:')&&!r.url().startsWith('blob:'))external.push(r.url());});
+  const adUrl='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7735416610367320';let adRequests=0;
+  await page.route('https://pagead2.googlesyndication.com/**',async route=>{assert.equal(route.request().url(),adUrl);adRequests++;await route.fulfill({contentType:'application/javascript',body:'/* AdSense mock: sem anúncios reais durante testes. */'});});
+  page.on('pageerror',e=>errors.push(String(e)));page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:')&&!r.url().startsWith('blob:')&&r.url()!==adUrl)external.push(r.url());});
   await page.goto(`http://127.0.0.1:${server.address().port}/entre-pautas/`);
   await page.evaluate(()=>{
     window.__draws=[];const draw=CanvasRenderingContext2D.prototype.fillText;
@@ -49,6 +51,6 @@ try{
     await page.getByRole('button',{name:'Começar outra pesquisa',exact:true}).click();await page.getByRole('button',{name:'Apagar respostas e começar outra',exact:true}).click();
     console.log(`OK ${level}: ${count} respostas, duas ações, PNG com site/Instagram, expectativa abaixo, share/fallback.`);
   }
-  assert.deepEqual(errors,[]);assert.deepEqual(external,[]);assert.deepEqual(await page.evaluate(()=>[document.cookie,localStorage.length,sessionStorage.length]),['',0,0]);
+  assert.equal(adRequests,1);assert.deepEqual(errors,[]);assert.deepEqual(external,[]);assert.deepEqual(await page.evaluate(()=>[document.cookie,localStorage.length,sessionStorage.length]),['',0,0]);
   console.log('Browser OK: navegação, foco, revisão, mobile/desktop e privacidade.');
 }finally{await browser.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

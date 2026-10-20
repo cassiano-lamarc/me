@@ -103,7 +103,7 @@ document.addEventListener('click',event=>{
   ]:[
     'Respostas e expectativa opcional ficam apenas na memória desta aba. Não usamos localStorage, cookies, analytics, login ou APIs para registrar ou calcular opiniões políticas. Fechar ou recarregar encerra a sessão.',
     'Fotos e fontes tipográficas são arquivos locais. O servidor de hospedagem recebe as requisições normais de arquivos e pode tratar dados técnicos de acesso conforme suas próprias políticas; as respostas não são incluídas em URLs, logs da aplicação ou requisições.',
-    'Publicidade está desativada. Nenhum script do Google é carregado por esta aplicação. Uma ativação futura exige revisão de privacidade, aprovação e consentimento aplicável; a rede de anúncios poderá receber dados técnicos, nunca respostas ou scores para segmentação.',
+    'O código do Google AdSense está instalado e é carregado ao abrir a página. O Google pode receber dados técnicos de navegação, como endereço IP e informações do navegador, e usar cookies ou tecnologias semelhantes conforme as configurações da conta e o consentimento aplicável. A aplicação não envia respostas, expectativa ou scores em parâmetros ou eventos de publicidade. Os blocos manuais ainda não estão ativados; anúncios automáticos dependem das configurações e da aprovação no painel do Google.',
     'Baixar e compartilhar são ações suas. A imagem e os apps escolhidos recebem o resultado somente por sua ação. A resposta à pergunta opcional não aparece na imagem.',
     'Abrir fontes ou canais de contato leva a serviços externos. Os links das evidências não enviam o endereço de origem como referenciador. Para contato, use o site pessoal ou o Instagram abaixo.'
   ],target,'Fechar');

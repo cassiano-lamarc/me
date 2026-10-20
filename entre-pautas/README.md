@@ -39,25 +39,25 @@ Para ampliar a base, adicionar a `evidence.js` fontes atribuíveis à própria p
 - `app.js`, `details.js`, `style.css`: telas, revisão, modal nativo com Escape e retorno do foco, radios por teclado, autoria e informações de privacidade/metodologia.
 - `report.js`, `export-image.js`, `zip.js`: TXT com todas as fontes; PNG social 1080 × 1920; relatório em páginas de 1080 × 1920 e ZIP sem compressão, implementado localmente com CRC-32. PNGs já são comprimidos; biblioteca externa não é necessária. Quebra por `measureText`, fonte de corpo 28–34 px e blocos indivisíveis por resposta. Páginas desenhadas sequencialmente; canvas liberado após cada PNG. Imagem social cacheada por sessão/revisão e sem expectativa opcional.
 - `share.js`: detecção de compartilhamento de arquivos, segundo toque após geração e prévia, link canônico sem respostas como alternativa, cópia com fallback e cancelamento benigno.
-- `ads.js`: slots persistentes fora de `#app`, sem recriação por pergunta. Nenhum carregamento de publicidade com configuração desativada.
+- `ads.js`: slots manuais persistentes fora de `#app`, sem recriação por pergunta. O snippet de conexão é carregado pelo HTML e reutilizado pelo loader.
 
 Fotos reais locais, identidade e licença verificadas: [atribuições](assets/candidates/ATTRIBUTION.md). Fontes Manrope e DM Sans locais, obtidas do repositório `google/fonts`, com licenças OFL em `assets/fonts/`. Enquadramento igual na interface; falha de imagem usa iniciais neutras com nome preservado. Composições exportadas são identificadas como CC BY-SA 4.0 para respeitar a licença da fotografia de Flávio.
 
 ## Privacidade
 
-Respostas, expectativa e arquivos gerados ficam na memória da aba. Nenhum cookie, localStorage, sessionStorage, analytics, pixel ou API de cálculo. Recarregar encerra a sessão. Os arquivos do site exigem requisições HTTP normais à hospedagem, que pode tratar dados técnicos segundo suas políticas. Fontes e imagens não dependem de terceiros na execução. Somente o usuário decide baixar, copiar, abrir fontes ou compartilhar. O TXT e o relatório completo incluem expectativa; a imagem social a omite. Não há opinião em URL, log da aplicação, `dataLayer` ou publicidade.
+Respostas, expectativa e arquivos gerados ficam na memória da aba; a aplicação não os grava em cookies, localStorage ou sessionStorage, nem os envia em URLs, logs, eventos analíticos ou parâmetros de publicidade. Recarregar encerra a sessão. O script externo do AdSense é carregado ao abrir a página e pode tratar dados técnicos, cookies ou tecnologias semelhantes conforme as configurações da conta e o consentimento aplicável. A hospedagem também recebe requisições normais de arquivos. Fontes e fotos são locais. Download e compartilhamento dependem da ação do usuário; a imagem omite a expectativa opcional.
 
-## AdSense — preparação desativada
+## AdSense — snippet instalado; blocos manuais desativados
 
-Nenhum ID foi inventado; não há anúncio real, snippet de verificação, metatag de editor ou `ads.txt` fictício. Espaços na entrada, antes do progresso e no resultado mostram apenas “Publicidade / Espaço disponível”. Preparar código não aprova a conta/site nem ativa monetização.
+O proprietário forneceu o snippet com `ca-pub-7735416610367320`, instalado no `<head>` da home do domínio e do Entre Pautas. Esse script carrega independentemente de `adConfig.enabled`, que controla somente os blocos manuais. O loader reutiliza o snippet existente. Nenhuma aprovação foi presumida. Anúncios automáticos dependem da aprovação e das configurações do painel. Slots manuais continuam vazios e seus espaços mostram “Publicidade / Espaço disponível”. Não foi criado `ads.txt` sem o registro fornecido pelo painel.
 
 Após obter os dados reais no painel, o proprietário precisa:
 
 1. Revisar as políticas, a elegibilidade e o tratamento de informações sensíveis deste contexto; obter aprovação da conta e do site. A comparação política nunca pode alimentar segmentação.
 2. Revisar a privacidade e integrar um mecanismo real de consentimento aplicável. `consentGranted` é uma trava técnica, **não uma implementação de CMP**; deve refletir a decisão válida em tempo de execução e permanecer `false` até lá. Não ligar essa flag permanentemente como atalho.
-3. Inserir `clientId` real (`ca-pub-` + 16 dígitos) e os IDs reais em `slots.home`, `slots.quizTop` e `slots.result` de `ads.js`. Definir `approved` e `privacyReviewed` somente após cumprir essas etapas, além de `enabled`.
-4. Fornecer a escolha de verificação do painel (snippet ou metatag) e seu conteúdo real, para adicioná-la ao documento correto. Se AdSense solicitar `ads.txt`, adicionar o registro **exato** na raiz do domínio, preservando linhas existentes. Não há dados suficientes para executar isso nesta entrega.
-5. Atualizar a página de privacidade ao ativar rede externa: distinguir respostas locais de dados técnicos processados pela rede. Não conectar candidatos, score, expectativa ou respostas à configuração de anúncios.
+3. O `clientId` já está preenchido. Para blocos manuais, fornecer os IDs reais em `slots.home`, `slots.quizTop` e `slots.result` de `ads.js`. Definir `approved` e `privacyReviewed` somente após cumprir essas etapas, além de `enabled`. Essas flags não bloqueiam o snippet estático nem anúncios automáticos do painel.
+4. Confirmar a instalação do snippet e solicitar/verificar a revisão no painel do AdSense. Se o painel solicitar `ads.txt`, fornecer o registro **exato** para adicionar na raiz do domínio, preservando linhas existentes.
+5. Manter a privacidade atualizada conforme as configurações reais do painel. Não conectar candidatos, score, expectativa ou respostas à configuração de anúncios.
 
 O loader carrega o script oficial uma vez; cada contêiner só recebe uma unidade e um `push`. Navegação, detalhes e seleção não reinicializam nem atualizam unidades. Sem preenchimento, bloqueio ou falha de rede não impedem o quiz. Não há timers de atualização. Nenhum anúncio foi testado com cliques reais.
 

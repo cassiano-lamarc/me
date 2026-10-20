@@ -1,7 +1,9 @@
-export const adConfig = { enabled: false, clientId: '', slots: { home: '', quizTop: '', result: '' }, approved: false, privacyReviewed: false, consentGranted: false };
+export const adConfig = { enabled: false, clientId: 'ca-pub-7735416610367320', slots: { home: '', quizTop: '', result: '' }, approved: false, privacyReviewed: false, consentGranted: false };
 const initialized = new WeakSet();
 let scriptPromise;
 function loadScript(config, doc, win) {
+  // O snippet de conexão já pode estar no HTML. A fila funciona antes de seu carregamento.
+  if (!scriptPromise && doc.querySelector?.(`script[src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.clientId}"]`)) scriptPromise = Promise.resolve(true);
   if (!scriptPromise) scriptPromise = new Promise(resolve => {
     const script = doc.createElement('script');
     script.async = true;
