@@ -1,17 +1,21 @@
 import { candidates } from './candidates.js';
-import { hasBinaryEvidence, hasBothBinaryPositions } from './eligibility.js';
-export const hasRecord=hasBinaryEvidence;
-export const isComparable=hasBothBinaryPositions;
-export const positionLabel=p=>hasRecord(p)?(p.stance==='favor'?'A favor':'Contra'):'Posição não confirmada';
-export const coverageLabel=key=>({both:'Registros dos dois',one:'Registro de apenas um',none:'Nenhum registro confirmado'}[key]);
-export function compareDocuments(session,proposals){
- const byId=new Map(proposals.map(p=>[p.id,p])),coverage={both:0,one:0,none:0};
- const rows=session.questionOrder.map(id=>{
-  const proposal=byId.get(id);if(!proposal)throw Error('Proposta não encontrada: '+id);
-  const records=candidates.map(candidate=>({candidate,position:proposal.positions?.[candidate.id],confirmed:hasRecord(proposal.positions?.[candidate.id])}));
-  const count=records.filter(r=>r.confirmed).length,kind=count===2?'both':count===1?'one':'none';coverage[kind]++;
-  return {proposal,answer:session.answersByQuestionId[id],records,coverage:kind};
- });
- const byGroup=candidates.map(candidate=>{const count=rows.filter(row=>row.records.find(r=>r.candidate.id===candidate.id).confirmed).length;return {id:candidate.id,name:candidate.name,count,total:rows.length,percent:rows.length?Math.round(count/rows.length*100):null};});
- return {total:rows.length,coverage,byGroup,rows};
+export const isComparable = proposal => candidates.every(c => {
+  const p = proposal.positions[c.id];
+  return p && ['favor','against'].includes(p.stance) && p.verifiedAt && p.sources.some(s => /^https:\/\//.test(s.url) && s.date && s.summary);
+});
+export function calculate(session, proposals) {
+  const eligible = session.questionOrder.map(id => proposals.find(p => p.id === id)).filter(p => p && isComparable(p) && ['favor','against'].includes(session.answersByQuestionId[p.id]));
+  const results = candidates.map(c => {
+    const matches = eligible.filter(p => p.positions[c.id].stance === session.answersByQuestionId[p.id]);
+    const divergences = eligible.filter(p => p.positions[c.id].stance !== session.answersByQuestionId[p.id]);
+    return { ...c, matches, divergences, count: matches.length, percent: eligible.length ? Math.round(matches.length / eligible.length * 100) : null };
+  });
+  const max = Math.max(...results.map(r => r.count));
+  return { denominator: eligible.length, results, leaders: eligible.length ? results.filter(r => r.count === max) : [] };
+}
+export function exclusion(proposal, value) {
+  if (!isComparable(proposal)) return 'Exploratória: evidência insuficiente para comparar os dois.';
+  if (!value) return 'Não respondida; fora do cálculo.';
+  if (!['favor','against'].includes(value)) return 'Resposta sem posição binária; fora do cálculo.';
+  return 'Incluída no cálculo, com peso igual.';
 }

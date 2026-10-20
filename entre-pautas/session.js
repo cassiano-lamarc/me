@@ -9,7 +9,6 @@ export function shuffle(ids, random = Math.random) {
 }
 export function createSession(level, random = Math.random) {
   if (!levels[level]) throw new Error('Nível inválido');
-  if(!levels[level].ids.length)throw new Error('Não há perguntas com posições documentadas dos dois.');
   return { level, questionOrder: shuffle(levels[level].ids, random), answersByQuestionId: {}, index: 0, expectation: '', revision: 0, createdAt: new Date().toISOString() };
 }
 export function answer(session, id, value) {

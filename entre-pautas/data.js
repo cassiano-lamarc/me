@@ -1,5 +1,3 @@
-import { planProposals } from './plans.js';
-import { hasBothBinaryPositions } from './eligibility.js';
 import { evidence, unknown } from './evidence.js';
 // Ordem editorial explícita; a apresentação usa uma cópia embaralhada.
 const rows = [
@@ -44,10 +42,13 @@ const rows = [
   ['federacao','Gestão pública','Ampliar transferências federais a municípios com menor capacidade de arrecadação, usando critérios públicos?','As transferências redistribuem recursos entre entes para financiar serviços locais.','Um município com baixa receita própria poderia receber uma parcela maior do apoio.','A proposta não define fórmula, fonte de recursos nem substitui controle de despesas.'],
   ['transparencia','Gestão pública','Exigir divulgação padronizada e rastreável da destinação de emendas parlamentares?','A divulgação permite acompanhar quem indicou o recurso, seu destino e sua execução.','Um cidadão poderia consultar a indicação e os pagamentos de uma obra financiada por emenda.','Não se propõe acabar com todas as emendas; dados pessoais protegidos exigem tratamento adequado.']
 ];
-export const archivedProposals = rows.map(([id,category,title,details,example,conditions]) => ({ id,category,title,details,example,conditions,positions:evidence[id] || {lula:unknown(),'flavio-bolsonaro':unknown()} }));
-export const proposals = planProposals.filter(hasBothBinaryPositions);
+export const proposals = rows.map(([id,category,title,details,example,conditions]) => ({ id,category,title,details,example,conditions,positions:evidence[id] || {lula:unknown(),'flavio-bolsonaro':unknown()} }));
 export const proposalById = Object.fromEntries(proposals.map(p => [p.id,p]));
-export const levels = {simple:{label:'Planos TSE 2026',ids:proposals.map(p=>p.id)}};
+export const levels = {
+  simple: {label:'Simples', ids:['intervencao-df-2023','decreto-armas-2023','tributos-consumo','renda-basica','sus-atencao','escola-integral','marco-temporal','salario-minimo','desmatamento','moradia-social']},
+  medium: {label:'Média', ids:['intervencao-df-2023','decreto-armas-2023','tributos-consumo','renda-basica','sus-atencao','escola-integral','marco-temporal','salario-minimo','desmatamento','moradia-social','arcabouco','igualdade-salarial','creches','universidade-cotas','ensino-tecnico','vacinas','telemedicina','saneamento','transporte','energia-renovavel','agricultura-familiar','imposto-renda','violencia-mulher','camera-policial','internet-escolas']},
+  complete: {label:'Completa', ids:['intervencao-df-2023','decreto-armas-2023','tributos-consumo','renda-basica','sus-atencao','escola-integral','marco-temporal','salario-minimo','desmatamento','moradia-social','arcabouco','igualdade-salarial','creches','universidade-cotas','ensino-tecnico','vacinas','telemedicina','saneamento','transporte','energia-renovavel','agricultura-familiar','imposto-renda','violencia-mulher','camera-policial','internet-escolas','jornada-trabalho','aplicativos','previdencia','saude-mental','medicamentos','aborto','drogas','prisao','desastres','povos-indigenas','cultura','dados-pessoais','comercio-exterior','federacao','transparencia']}
+};
 export const options = [
   {id:'favor',label:'A favor',description:'Concordo com a proposta.',icon:'+'},
   {id:'against',label:'Contra',description:'Discordo da proposta.',icon:'−'},
@@ -55,4 +56,4 @@ export const options = [
   {id:'none',label:'Sem opinião',description:'Ainda não tenho uma posição.',icon:'○'}
 ];
 export const answerLabel = value => options.find(o => o.id === value)?.label || 'Não respondida';
-export const expectations = ['Sim, encontrei os registros que procurava.','Ainda faltam temas que quero consultar.','Eu estava em dúvida.','Não tenho uma avaliação.'];
+export const expectations = ['Sim, foi quem eu esperava.','Foi o candidato contrário ao que eu apoiava.','Eu estava em dúvida.','Não me identifico com essas opções.'];
