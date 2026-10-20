@@ -100,19 +100,28 @@ document.addEventListener('click',event=>{
   if(target.dataset.answer){const id=session.questionOrder[session.index];answer(session,id,target.dataset.answer);invalidateSocial();app.querySelectorAll('[data-answer]').forEach(b=>{b.setAttribute('aria-checked',String(b===target));b.tabIndex=b===target?0:-1;});app.querySelector('[data-action=next]').disabled=false;}
   if(target.dataset.edit!==undefined){session.index=Number(target.dataset.edit);screen='quiz';render();}
   if(target.dataset.action)void act(target.dataset.action,target);
-  if(target.dataset.info){const method=target.dataset.info==='method';openDetails(method?'Metodologia e limites':'Privacidade',method?[
+  if(target.dataset.info){const method=target.dataset.info==='method',contact=target.dataset.info==='contact';openDetails(method?'Metodologia e limites':contact?'Contato':'Privacidade',contact?[
+    'Fale com Cassiano Lamarc pelo site pessoal ou pelo Instagram nos links abaixo.'
+  ]:method?[
     'Esta é uma base beta com 40 propostas, das quais somente duas têm evidências históricas correspondentes dos dois políticos. Os níveis de 10, 25 e 40 usam subconjuntos editoriais aninhados; todos contêm as mesmas duas pautas comparáveis. A ordem é sorteada uma vez por sessão.',
     'As duas comparações são sobre atos específicos de 2023. As fontes foram conferidas em 20/10/2026 para documentar o histórico; isso não certifica posição atual. Outras pautas permanecem exploratórias até revisão de evidências com recorte equivalente.',
     'Somente A favor ou Contra em pauta comparável entra no denominador. Cada coincidência vale um ponto. Percentuais independentes: coincidências divididas pela base elegível. Empates recebem o mesmo destaque e zero respostas elegíveis não produz vencedor.',
     'Não inferimos intenção de voto, não temos amostra representativa e não usamos respostas de outras pessoas. Fontes e ressalvas aparecem após o resultado. Ausência de voto não significa abstenção formal ou oposição.',
-    'Sugestões de correção: cacassiano2011@gmail.com. Informe a pauta, o recorte e a fonte pública; não é necessário enviar suas respostas.'
+    'Para sugestões de correção, use os canais de contato abaixo. Informe a pauta, o recorte e a fonte pública; não é necessário enviar suas respostas.'
   ]:[
     'Respostas e expectativa opcional ficam apenas na memória desta aba. Não usamos localStorage, cookies, analytics, login ou APIs para registrar ou calcular opiniões políticas. Fechar ou recarregar encerra a sessão.',
     'Fotos e fontes tipográficas são arquivos locais. O servidor de hospedagem recebe as requisições normais de arquivos e pode tratar dados técnicos de acesso conforme suas próprias políticas; as respostas não são incluídas em URLs, logs da aplicação ou requisições.',
     'Publicidade está desativada. Nenhum script do Google é carregado por esta aplicação. Uma ativação futura exige revisão de privacidade, aprovação e consentimento aplicável; a rede de anúncios poderá receber dados técnicos, nunca respostas ou scores para segmentação.',
     'Exportar, copiar e compartilhar são ações suas. Arquivos baixados e apps escolhidos recebem o conteúdo que você decidir compartilhar. A imagem social omite a expectativa; o relatório completo e o TXT a incluem.',
-    'Abrir fontes ou contato leva a serviços externos. Os links das evidências não enviam o endereço de origem como referenciador. Contato: cacassiano2011@gmail.com.'
-  ],target,'Fechar');}
+    'Abrir fontes ou canais de contato leva a serviços externos. Os links das evidências não enviam o endereço de origem como referenciador. Para contato, use o site pessoal ou o Instagram abaixo.'
+  ],target,'Fechar');
+    const links=document.createElement('ul');links.className='link-list';
+    for(const [label,url] of [['Site pessoal — cassianolamarc.com.br/me','https://cassianolamarc.com.br/me'],['Instagram — @cassianolamarc','https://www.instagram.com/cassianolamarc/']]){
+      const item=document.createElement('li'),link=document.createElement('a');
+      link.textContent=label;link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.referrerPolicy='no-referrer';item.append(link);links.append(item);
+    }
+    document.getElementById('dialog-body').append(links);
+  }
 });
 app.addEventListener('change',event=>{if(event.target.id==='expectation'){session.expectation=expectations.includes(event.target.value)?event.target.value:'';clearFullPreview();}});
 app.addEventListener('keydown',event=>{const radio=event.target.closest('[data-answer]');if(!radio||!['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const buttons=[...app.querySelectorAll('[data-answer]')],index=buttons.indexOf(radio);const next=event.key==='Home'?0:event.key==='End'?3:(index+(['ArrowDown','ArrowRight'].includes(event.key)?1:3))%4;buttons[next].focus();buttons[next].click();});
