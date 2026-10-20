@@ -1,24 +1,21 @@
 import { candidates } from './candidates.js';
-import { groupEntries } from './group-records.js';
-// Coverage describes documents, never the visitor's political affinity.
-export const hasRecord = p => Boolean(p && ['favor','against','documented'].includes(p.stance) && p.verifiedAt && p.sources?.some(s => /^https:\/\//.test(s.url) && s.date && s.summary));
-export const positionLabel = p => hasRecord(p) ? p.label || ({favor:'A favor no recorte documentado',against:'Contrário no recorte documentado'}[p.stance] || 'Registro público contextualizado') : 'Posição não confirmada';
-export const isComparable = p => candidates.every(c => groupEntries(p,c).some(entry=>hasRecord(entry.position)));
-export function documentCoverage(p) { const n=candidates.filter(c => groupEntries(p,c).some(entry=>hasRecord(entry.position))).length; return n===2?'both':n===1?'one':'none'; }
-export const coverageLabel = key => ({both:'Registros dos dois grupos',one:'Registro de apenas um grupo',none:'Nenhum registro de posição confirmado'}[key]);
-export function compareDocuments(session, proposals) {
-  const byId=new Map(proposals.map(p=>[p.id,p])),coverage={both:0,one:0,none:0};
-  const rows=session.questionOrder.map(id=>{
-    const proposal=byId.get(id);if(!proposal)throw new Error('Proposta não encontrada: '+id);
-    const kind=documentCoverage(proposal);coverage[kind]++;
-    return {proposal,answer:session.answersByQuestionId[id],coverage:kind,records:candidates.map(candidate=>{
-      const entries=groupEntries(proposal,candidate),primary=entries.find(e=>hasRecord(e.position));
-      return {candidate,entries,primaryAuthor:primary?.author||null,position:primary?.position||entries[0].position,confirmed:Boolean(primary)};
-    })};
+export const isComparable = proposal => candidates.every(c => {
+  const p = proposal.positions[c.id];
+  return p && ['favor','against'].includes(p.stance) && p.verifiedAt && p.sources.some(s => /^https:\/\//.test(s.url) && s.date && s.summary);
+});
+export function calculate(session, proposals) {
+  const eligible = session.questionOrder.map(id => proposals.find(p => p.id === id)).filter(p => p && isComparable(p) && ['favor','against'].includes(session.answersByQuestionId[p.id]));
+  const results = candidates.map(c => {
+    const matches = eligible.filter(p => p.positions[c.id].stance === session.answersByQuestionId[p.id]);
+    const divergences = eligible.filter(p => p.positions[c.id].stance !== session.answersByQuestionId[p.id]);
+    return { ...c, matches, divergences, count: matches.length, percent: eligible.length ? Math.round(matches.length / eligible.length * 100) : null };
   });
-  const byGroup=candidates.map(candidate=>{
-    const count=rows.filter(row=>row.records.find(r=>r.candidate.id===candidate.id).confirmed).length;
-    return {id:candidate.id,name:candidate.name,count,total:rows.length,percent:rows.length?Math.round(count/rows.length*100):null};
-  });
-  return {total:rows.length,coverage,byGroup,rows};
+  const max = Math.max(...results.map(r => r.count));
+  return { denominator: eligible.length, results, leaders: eligible.length ? results.filter(r => r.count === max) : [] };
+}
+export function exclusion(proposal, value) {
+  if (!isComparable(proposal)) return 'Exploratória: evidência insuficiente para comparar os dois.';
+  if (!value) return 'Não respondida; fora do cálculo.';
+  if (!['favor','against'].includes(value)) return 'Resposta sem posição binária; fora do cálculo.';
+  return 'Incluída no cálculo, com peso igual.';
 }

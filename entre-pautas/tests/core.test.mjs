@@ -2,17 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { proposals, levels, proposalById } from '../data.js';
 import { createSession, answer, shuffle } from '../session.js';
-import { compareDocuments, isComparable, hasRecord, positionLabel } from '../score.js';
+import { calculate, isComparable } from '../score.js';
 import { textReport } from '../report.js';
 import { paginateBlocks, wrapText } from '../export-image.js';
 import { zipFiles } from '../zip.js';
 import { nativeShare, canShareFile, copyText } from '../share.js';
 import { initAd, adConfig } from '../ads.js';
-import { supplementaryRecords } from '../group-records.js';
 test('composição editorial 10/25/40, IDs únicos e subconjuntos aninhados',()=>{
   assert.equal(proposals.length,40);assert.equal(new Set(proposals.map(p=>p.id)).size,40);
   for(const [level,length] of [['simple',10],['medium',25],['complete',40]]){
-    const ids=levels[level].ids;assert.equal(ids.length,length);assert.equal(new Set(ids).size,length);assert(ids.every(id=>proposalById[id]));assert.equal(ids.filter(id=>isComparable(proposalById[id])).length,level==='simple'?2:3);
+    const ids=levels[level].ids;assert.equal(ids.length,length);assert.equal(new Set(ids).size,length);assert(ids.every(id=>proposalById[id]));assert.equal(ids.filter(id=>isComparable(proposalById[id])).length,2);
     assert(ids.every(id=>proposalById[id].details&&proposalById[id].example&&proposalById[id].conditions));
   }
   assert(levels.simple.ids.every(id=>levels.medium.ids.includes(id)));assert(levels.medium.ids.every(id=>levels.complete.ids.includes(id)));
@@ -24,64 +23,19 @@ test('Fisher–Yates não altera a lista editorial e sessão preserva ordem dura
   const next=createSession('simple',()=>.8);assert.deepEqual(next.answersByQuestionId,{});assert.equal(next.expectation,'');assert.notDeepEqual(next.questionOrder,order);
   assert.deepEqual(shuffle(['a','b'],()=>.99),['a','b']);
 });
-test('cobertura separa dois, um e nenhum; respostas nunca produzem placar',()=>{
-  for(const level of Object.keys(levels)){
-    const s=createSession(level),before=compareDocuments(s,proposals);
-    for(const value of ['favor','against','depends','none']){
-      for(const id of s.questionOrder)answer(s,id,value);
-      const c=compareDocuments(s,proposals);assert.deepEqual(c.coverage,before.coverage);assert.deepEqual(c.byGroup,before.byGroup);
-      assert.equal(c.coverage.both+c.coverage.one+c.coverage.none,c.total);
-      assert(c.rows.every(r=>r.answer===value));assert(!('leaders' in c));assert(!('results' in c));assert(!('denominator' in c));
-    }
-  }
-  const p=structuredClone(proposals[0]);p.positions.lula.sources=[];assert.equal(isComparable(p),false);assert.equal(hasRecord(p.positions.lula),false);assert.equal(positionLabel(p.positions.lula),'Posição não confirmada');
-  const s={questionOrder:['x'],answersByQuestionId:{x:'favor'}};
-  assert.deepEqual(compareDocuments(s,[{id:'x',positions:{}}]).coverage,{both:0,one:0,none:1});
-  assert.deepEqual(compareDocuments({questionOrder:[],answersByQuestionId:{}},[]).coverage,{both:0,one:0,none:0});
-  assert.throws(()=>compareDocuments(s,[]),/Proposta não encontrada/);
+test('coincidências, empate, exclusões, independência e zero denominador',()=>{
+  const s=createSession('simple');const eligible=proposals.filter(isComparable);let score=calculate(s,proposals);assert.equal(score.denominator,0);assert.deepEqual(score.leaders,[]);assert(score.results.every(r=>r.percent===null));
+  for(const p of eligible)answer(s,p.id,'favor');score=calculate(s,proposals);assert.equal(score.denominator,2);assert.equal(score.results[0].percent,100);assert.equal(score.results[1].percent,0);
+  for(const p of eligible)answer(s,p.id,'against');assert.equal(calculate(s,proposals).results[1].percent,100);
+  answer(s,eligible[0].id,'favor');score=calculate(s,proposals);assert.equal(score.leaders.length,2);assert.equal(score.results[0].percent,50);
+  answer(s,eligible[0].id,'depends');answer(s,eligible[1].id,'none');answer(s,'sus-atencao','favor');assert.equal(calculate(s,proposals).denominator,0);
+  const both=eligible.map(p=>({...p,positions:{...p.positions,'flavio-bolsonaro':p.positions.lula}}));for(const p of both)answer(s,p.id,'favor');score=calculate(s,both);assert(score.results.every(r=>r.percent===100));
+  const noEvidence=structuredClone(eligible[0]);noEvidence.positions.lula.sources=[];assert.equal(isComparable(noEvidence),false);
 });
-
-test('percentual de cobertura conta perguntas documentadas, incluindo base vazia',()=>{
-  const simple=compareDocuments(createSession('simple'),proposals);
-  assert.deepEqual(simple.byGroup.map(g=>[g.count,g.total,g.percent]),[[8,10,80],[3,10,30]]);
-  const empty=compareDocuments({questionOrder:[],answersByQuestionId:{}},[]);assert(empty.byGroup.every(g=>g.percent===null&&g.count===0));
-  const unknown=compareDocuments({questionOrder:['x'],answersByQuestionId:{x:'favor'}},[{id:'x',positions:{}}]);assert(unknown.byGroup.every(g=>g.percent===0&&g.count===0));
-  const report=textReport(createSession('simple'),proposals);assert(report.includes('80% de cobertura documental'));assert(report.includes('30% de cobertura documental'));
-});
-test('expectativa não altera cobertura e TXT contém todas as respostas, fontes e ordem efetiva',()=>{
-  const s=createSession('complete',()=>.42);for(const id of s.questionOrder)answer(s,id,'favor');const before=compareDocuments(s,proposals);s.expectation='Eu estava em dúvida.';assert.deepEqual(compareDocuments(s,proposals),before);
+test('expectativa não altera score e TXT contém todas as respostas, fontes e ordem efetiva',()=>{
+  const s=createSession('complete',()=>.42);for(const id of s.questionOrder)answer(s,id,'favor');const before=calculate(s,proposals);s.expectation='Eu estava em dúvida.';assert.deepEqual(calculate(s,proposals),before);
   const text=textReport(s,proposals);assert(text.includes(s.expectation));assert(text.includes('https://www25.senado.leg.br'));let previous=0;
   for(const [i,id] of s.questionOrder.entries()){const index=text.indexOf(`${i+1}. ${proposalById[id].title}`);assert(index>=previous);previous=index;}
-});
-
-test('registros têm fonte, data, contexto e atribuição; desconhecido não vira oposição',()=>{
-  for(const p of proposals)for(const pos of Object.values(p.positions)){
-    if(hasRecord(pos)){assert.match(pos.verifiedAt,/^\d{4}-\d{2}-\d{2}$/);assert(pos.note);for(const source of pos.sources){assert.match(source.url,/^https:\/\//);assert.match(source.date,/^\d{4}-\d{2}-\d{2}$/);assert(source.summary&&source.title);}}
-    else assert.equal(positionLabel(pos),'Posição não confirmada');
-  }
-  assert.equal(hasRecord(proposalById['renda-basica'].positions['flavio-bolsonaro']),false);
-  assert.equal(hasRecord(proposalById['universidade-cotas'].positions['flavio-bolsonaro']),false);
-});
-
-test('prioridade organiza documentos sem transferir autoria para candidatos',()=>{
-  const original=proposalById.telemedicina,session={questionOrder:[original.id],answersByQuestionId:{}};
-  const read=p=>compareDocuments(session,[p]).rows[0].records.find(r=>r.candidate.id==='flavio-bolsonaro');
-  assert.equal(read(original).primaryAuthor,'Jair Bolsonaro');
-  assert.equal(original.positions['flavio-bolsonaro'].stance,'unknown');
-  const jair=supplementaryRecords.telemedicina.jair;
-  supplementaryRecords.telemedicina.pl={...jair,label:'Registro de teste do PL'};
-  try{
-    assert.equal(read(original).primaryAuthor,'Jair Bolsonaro');
-    const own={...original,positions:{...original.positions,'flavio-bolsonaro':{...jair,label:'Registro de teste de Flávio'}}};
-    assert.equal(read(own).primaryAuthor,'Flávio Bolsonaro');
-    assert.deepEqual(read(own).entries.map(e=>e.authorId),['flavio-bolsonaro','jair','pl']);
-  }finally{delete supplementaryRecords.telemedicina.pl;}
-  const p=proposalById.creches;
-  const left=compareDocuments({questionOrder:[p.id],answersByQuestionId:{}},[p]).rows[0].records[0];
-  assert.equal(left.primaryAuthor,'PT — Partido dos Trabalhadores');assert.equal(p.positions.lula.stance,'unknown');
-  const text=textReport(createSession('medium'),proposals);
-  assert(text.includes('Responsável: Jair Bolsonaro'));assert(text.includes('Responsável: PT — Partido dos Trabalhadores'));assert(text.includes('Responsável: PL — Partido Liberal'));
-  for(const records of Object.values(supplementaryRecords))for(const pos of Object.values(records))for(const source of pos.sources){assert.match(source.url,/^https:\/\//);assert(source.date&&source.summary&&source.title);}
 });
 test('paginação não perde nem corta blocos; quebra inclusive palavras maiores que uma linha',()=>{
   const blocks=Array.from({length:40},(_,i)=>({id:i,height:300}));const pages=paginateBlocks(blocks,900);assert.deepEqual(pages.flat().map(b=>b.id),blocks.map(b=>b.id));pages.forEach((page,i)=>assert(page.reduce((sum,b)=>sum+b.height,i===0?900:260)<=1685));
