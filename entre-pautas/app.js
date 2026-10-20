@@ -23,7 +23,13 @@ function render(focus=true){
   showAd(screen==='quiz'?'quizTop':screen==='result'?'result':'home');
   if(screen==='home') renderHome();else if(screen==='quiz')renderQuiz();else renderResult();
   app.querySelectorAll('img[data-portrait]').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;img.nextElementSibling.hidden=false;},{once:true}));
-  if(focus){const heading=app.querySelector('h1');heading.tabIndex=-1;heading.focus();window.scrollTo({top:0,behavior:'instant'});}
+  if(focus){
+    const heading=app.querySelector('h1');
+    heading.tabIndex=-1;
+    heading.focus({preventScroll:true});
+    const top=screen==='quiz'?Math.max(0,window.scrollY+heading.getBoundingClientRect().top-20):0;
+    window.scrollTo({top,behavior:'instant'});
+  }
 }
 function renderHome(){
   app.innerHTML=`<span class="hero-mark" aria-hidden="true">≋</span><p class="eyebrow">Afinidade política, com contexto</p><h1>Antes dos nomes,<br>vamos às pautas.</h1><p class="lead">O que você pensa sobre as propostas? Compare suas respostas com registros públicos de <strong>Lula</strong> e <strong>Flávio Bolsonaro</strong>.</p><p>Uma pergunta por vez. Quatro formas de responder. Fontes para conferir depois.</p><h2>Até onde vamos?</h2><div class="levels" role="group" aria-label="Profundidade da pesquisa">${Object.entries(levels).map(([key,item])=>`<button type="button" class="level" data-level="${key}" aria-pressed="${key===level}"><strong>${item.label}</strong><span>${item.ids.length} perguntas</span><span>${comparableCount(key)} comparáveis<br>${item.ids.length-comparableCount(key)} exploratórias</span></button>`).join('')}</div><p class="notice"><strong>Base beta em revisão:</strong> nesta edição, apenas duas pautas históricas de 2023 têm evidências correspondentes dos dois. Os demais temas ajudam na reflexão e não pontuam. Mais perguntas não significam maior precisão.</p>${btn('start','Iniciar pesquisa →','primary wide')}<p class="notice">Suas respostas ficam só na memória desta aba. Recarregar ou fechar a página encerra a sessão. Não há login, armazenamento de opiniões ou envio automático.</p>`;
