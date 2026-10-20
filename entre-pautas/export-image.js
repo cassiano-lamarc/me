@@ -1,7 +1,7 @@
 import { candidates, CANONICAL_URL } from './candidates.js';
 import { levels, proposalById, answerLabel } from './data.js';
 import { compareDocuments } from './score.js';
-import { resultTitle, dateLabel, coverageText, rowText } from './report.js';
+import { resultTitle, dateLabel, coverageText, rowText, groupContext } from './report.js';
 const W=1080,H=1920,P=72,CONTENT=W-P*2,BOTTOM=1685;
 const colors = { paper:'#f6f7f2', ink:'#172f2a', muted:'#53663f', line:'#dce2d9', lime:'#d8ed9c' };
 let cache = null;
@@ -66,7 +66,7 @@ export async function socialImage(session,proposals) {
  if(!ctx)throw new Error('Canvas indisponível neste navegador.');
  try{base(ctx,1,1);let y=resultHeader(ctx,comparison,images);
  y=paragraph(ctx,'Pesquisa '+levels[session.level].label+' • '+dateLabel(session),P,y,CONTENT,28)+32;
- for(const text of ['Cobertura documental, sem classificação de candidatos.','Posição não confirmada indica uma lacuna na base. Ausência de registro não significa oposição.','Registros históricos não certificam posições atuais. Consulte fontes, datas e ressalvas na tabela do site ou no relatório completo.','A cobertura independe das respostas do visitante. Não calculamos afinidade nem recomendamos voto.'])y=paragraph(ctx,text,P,y,CONTENT,32)+28;
+ for(const text of ['Cobertura documental, sem classificação de candidatos.',groupContext,'Posição não confirmada indica uma lacuna na base. Ausência de registro não significa oposição.','Registros históricos não certificam posições atuais. Consulte fontes, datas e ressalvas na tabela do site ou no relatório completo.','A cobertura independe das respostas do visitante. Não calculamos afinidade nem recomendamos voto.'])y=paragraph(ctx,text,P,y,CONTENT,32)+28;
  const blob=await blobFrom(c);cache={session,revision:session.revision,blob};return blob;
  }finally{c.width=1;c.height=1;}
 }

@@ -40,6 +40,12 @@ try{
     assert.equal(await page.locator('.comparison-table').isVisible(),false);
     await accordion.locator('summary').focus();await page.keyboard.press('Enter');
     assert.equal(await page.locator('.comparison-table').isVisible(),true);
+    assert.deepEqual(await page.locator('.comparison-table thead th').allTextContents(),['Proposta','Sua resposta','Lula e PT','Flávio Bolsonaro e PL']);
+    assert.equal(await page.locator('.actor-record').count(),count*5);
+    if(level!=='simple'){
+      const tele=page.locator('.review-item').filter({hasText:'Ampliar consultas a distância no SUS'});
+      assert((await tele.innerText()).includes('Referência contextual prioritária: Jair Bolsonaro'));
+    }
     await accordion.locator('summary').click();
     assert.equal(await page.locator('.comparison-table').isVisible(),false);
     const sharePosition=await page.locator('#sharing').boundingBox(),accordionPosition=await accordion.boundingBox();

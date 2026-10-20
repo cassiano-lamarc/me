@@ -4,6 +4,8 @@ Aplicação estática em /entre-pautas/, integrada ao site existente. HTML, CSS 
 
 A ferramenta apresenta propostas, a resposta do visitante e registros públicos de Lula e Flávio Bolsonaro, lado a lado, com fontes, datas e contexto. Não calcula afinidade, coincidências, percentuais ou vencedor e não recomenda voto. A cobertura conta perguntas com documentos dos dois, de apenas um ou de nenhum, independentemente das respostas.
 
+A consulta foi organizada nos grupos “Lula e PT” e “Flávio Bolsonaro e PL”. A ordem é Lula → PT e Flávio → Jair → PL; cada documento mantém seu responsável identificado e as lacunas individuais continuam visíveis. Veja [GROUPS.md](GROUPS.md) para fontes, recortes, prioridades e cobertura atual dos grupos. Essa organização não transfere posições entre candidatos, familiares e partidos.
+
 ## Executar e verificar
 
 Sirva a raiz do repositório por HTTP e abra /entre-pautas/. Módulos ES não funcionam por file://. Para os testes, use Node 20+:

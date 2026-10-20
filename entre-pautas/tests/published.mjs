@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 const base='https://cassianolamarc.com.br/entre-pautas/';
 const report={checkedAt:new Date().toISOString(),files:[],runs:[],errors:[]};
-for(const name of ['index.html','app.js','data.js','evidence.js','score.js','report.js','export-image.js','session.js']){
+for(const name of ['index.html','app.js','data.js','evidence.js','group-records.js','candidates.js','score.js','report.js','export-image.js','session.js']){
  const response=await fetch(base+name),body=await response.text();
  const local=await readFile(new URL('../'+name,import.meta.url),'utf8');
  report.files.push({name,status:response.status,contentType:response.headers.get('content-type'),cacheControl:response.headers.get('cache-control'),age:response.headers.get('age'),sameAsWorkingTree:body.replaceAll('\r\n','\n')===local.replaceAll('\r\n','\n')});

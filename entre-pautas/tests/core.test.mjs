@@ -8,6 +8,7 @@ import { paginateBlocks, wrapText } from '../export-image.js';
 import { zipFiles } from '../zip.js';
 import { nativeShare, canShareFile, copyText } from '../share.js';
 import { initAd, adConfig } from '../ads.js';
+import { supplementaryRecords } from '../group-records.js';
 test('composição editorial 10/25/40, IDs únicos e subconjuntos aninhados',()=>{
   assert.equal(proposals.length,40);assert.equal(new Set(proposals.map(p=>p.id)).size,40);
   for(const [level,length] of [['simple',10],['medium',25],['complete',40]]){
@@ -52,6 +53,27 @@ test('registros têm fonte, data, contexto e atribuição; desconhecido não vir
   }
   assert.equal(hasRecord(proposalById['renda-basica'].positions['flavio-bolsonaro']),false);
   assert.equal(hasRecord(proposalById['universidade-cotas'].positions['flavio-bolsonaro']),false);
+});
+
+test('prioridade organiza documentos sem transferir autoria para candidatos',()=>{
+  const original=proposalById.telemedicina,session={questionOrder:[original.id],answersByQuestionId:{}};
+  const read=p=>compareDocuments(session,[p]).rows[0].records.find(r=>r.candidate.id==='flavio-bolsonaro');
+  assert.equal(read(original).primaryAuthor,'Jair Bolsonaro');
+  assert.equal(original.positions['flavio-bolsonaro'].stance,'unknown');
+  const jair=supplementaryRecords.telemedicina.jair;
+  supplementaryRecords.telemedicina.pl={...jair,label:'Registro de teste do PL'};
+  try{
+    assert.equal(read(original).primaryAuthor,'Jair Bolsonaro');
+    const own={...original,positions:{...original.positions,'flavio-bolsonaro':{...jair,label:'Registro de teste de Flávio'}}};
+    assert.equal(read(own).primaryAuthor,'Flávio Bolsonaro');
+    assert.deepEqual(read(own).entries.map(e=>e.authorId),['flavio-bolsonaro','jair','pl']);
+  }finally{delete supplementaryRecords.telemedicina.pl;}
+  const p=proposalById.creches;
+  const left=compareDocuments({questionOrder:[p.id],answersByQuestionId:{}},[p]).rows[0].records[0];
+  assert.equal(left.primaryAuthor,'PT — Partido dos Trabalhadores');assert.equal(p.positions.lula.stance,'unknown');
+  const text=textReport(createSession('medium'),proposals);
+  assert(text.includes('Responsável: Jair Bolsonaro'));assert(text.includes('Responsável: PT — Partido dos Trabalhadores'));assert(text.includes('Responsável: PL — Partido Liberal'));
+  for(const records of Object.values(supplementaryRecords))for(const pos of Object.values(records))for(const source of pos.sources){assert.match(source.url,/^https:\/\//);assert(source.date&&source.summary&&source.title);}
 });
 test('paginação não perde nem corta blocos; quebra inclusive palavras maiores que uma linha',()=>{
   const blocks=Array.from({length:40},(_,i)=>({id:i,height:300}));const pages=paginateBlocks(blocks,900);assert.deepEqual(pages.flat().map(b=>b.id),blocks.map(b=>b.id));pages.forEach((page,i)=>assert(page.reduce((sum,b)=>sum+b.height,i===0?900:260)<=1685));
