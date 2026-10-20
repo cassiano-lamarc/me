@@ -1,7 +1,7 @@
 import { candidates, CANONICAL_URL } from './candidates.js';
 import { levels, proposalById, answerLabel } from './data.js';
-import { calculate, exclusion } from './score.js';
-import { resultTitle, dateLabel } from './report.js';
+import { compareDocuments } from './score.js';
+import { resultTitle, dateLabel, coverageText, rowText, groupCoverageText } from './report.js';
 const W=1080,H=1920,P=72,CONTENT=W-P*2,BOTTOM=1685;
 const colors = { paper:'#f6f7f2', ink:'#172f2a', muted:'#53663f', line:'#dce2d9', lime:'#d8ed9c' };
 let cache = null;
@@ -47,50 +47,32 @@ function base(ctx,page,total) {
   paragraph(ctx,'entre pautas  /  beta',P,62,CONTENT,32,700);
   ctx.fillStyle=colors.line;ctx.fillRect(P,1730,CONTENT,2);
   let y=1754;
-  y=paragraph(ctx,'Coincidência de propostas. Não é recomendação de voto.',P,y,CONTENT,24);
+  y=paragraph(ctx,'Comparação factual. Não é recomendação de voto.',P,y,CONTENT,24);
   y=paragraph(ctx,'@cassianolamarc • cassianolamarc.com.br',P,y+5,CONTENT,26,700);
   y=paragraph(ctx,'Desenvolvido por Cassiano Lamarc • cassianolamarc.com.br/entre-pautas/',P,y+5,CONTENT,18);
   y=paragraph(ctx,'Fotos: Ricardo Stuckert/PR • CC BY 2.0; Carlos Moura/Ag. Senado • CC BY-SA 4.0',P,y+5,CONTENT,16);
   paragraph(ctx,`Página ${page} de ${total} • composição exportada CC BY-SA 4.0`,P,y+5,CONTENT,18);
 }
-function resultHeader(ctx,score,images,start=152,compact=false) {
-  let y=paragraph(ctx,resultTitle(score),P,start,CONTENT,compact?44:58,700);
-  if(score.denominator) {
-    const cols=score.leaders.length===2?score.results:score.leaders;
-    const width=CONTENT/cols.length;
-    cols.forEach((c,i)=> {
-      portrait(ctx,images[candidates.findIndex(a=>a.id===c.id)],P+i*width,y+22,compact?100:170,compact?112:190,c.initials);
-      paragraph(ctx,c.name,P+i*width+(compact?118:190),y+38,width-(compact?130:200),compact?30:38,700);
-    });
-    y+=compact?158:235;
-  }
-  for(const c of score.results) y=paragraph(ctx,`${c.name}: ${c.percent===null?'sem percentual':c.percent+'%'} • ${c.count}/${score.denominator} coincidências`,P,y,CONTENT,compact?30:36,600)+12;
-  return paragraph(ctx,`Base: ${score.denominator} respostas elegíveis. Percentuais independentes.`,P,y+5,CONTENT,28,400,colors.muted)+24;
+function resultHeader(ctx,comparison,images,start=152,compact=false) {
+ let y=paragraph(ctx,resultTitle(),P,start,CONTENT,compact?44:58,700),width=CONTENT/2;
+ candidates.forEach((c,i)=>{portrait(ctx,images[i],P+i*width,y+22,compact?100:150,compact?112:168,c.initials);paragraph(ctx,c.name,P+i*width+(compact?118:170),y+30,width-(compact?130:182),compact?28:32,700);});
+ y+=compact?155:210;
+ y=paragraph(ctx,coverageText(comparison),P,y,CONTENT,compact?28:36,600)+16;
+ for(const group of comparison.byGroup)y=paragraph(ctx,groupCoverageText(group),P,y,CONTENT,compact?24:28,600)+10;
+ return y+18;
 }
 function blobFrom(c) { return new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error('Não foi possível gerar o PNG.')),'image/png')); }
 export async function socialImage(session,proposals) {
-  if(cache?.session===session && cache.revision===session.revision) return cache.blob;
-  const images=await assets(), score=calculate(session,proposals),c=canvas(),ctx=c.getContext('2d');
-  if(!ctx) throw new Error('Canvas indisponível neste navegador.');
-  try {
-    base(ctx,1,1);let y=resultHeader(ctx,score,images);
-    y=paragraph(ctx,`Pesquisa ${levels[session.level].label} • ${dateLabel(session)}`,P,y,CONTENT,28)+28;
-    const matches = [...new Map(score.leaders.flatMap(r=>r.matches).map(p=>[p.id,p])).values()].slice(0,3);
-    if(matches.length) {
-      y=paragraph(ctx,'Pautas em que houve coincidência',P,y,CONTENT,32,700)+18;
-      for(const p of matches) y=paragraph(ctx,`• ${p.title} — ${answerLabel(session.answersByQuestionId[p.id])}`,P,y,CONTENT,30)+18;
-    } else y=paragraph(ctx,'Ainda não há coincidências para explicar. Respostas exploratórias, “Depende” e “Sem opinião” não pontuam.',P,y,CONTENT,32)+20;
-    paragraph(ctx,'Base beta restrita a registros históricos. Uma base pequena limita a interpretação; este resultado não identifica o voto ideal.',P,y+10,CONTENT,28,400,colors.muted);
-    const blob=await blobFrom(c);cache={session,revision:session.revision,blob};return blob;
-  } finally {c.width=1;c.height=1;}
+ if(cache?.session===session && cache.revision===session.revision)return cache.blob;
+ const images=await assets(),comparison=compareDocuments(session,proposals),c=canvas(),ctx=c.getContext('2d');
+ if(!ctx)throw new Error('Canvas indisponível neste navegador.');
+ try{base(ctx,1,1);let y=resultHeader(ctx,comparison,images);
+ y=paragraph(ctx,'Pesquisa '+levels[session.level].label+' • '+dateLabel(session),P,y,CONTENT,28)+32;
+ for(const text of ['Cobertura documental, sem classificação de candidatos.','Posição não confirmada indica uma lacuna na base. Ausência de registro não significa oposição.','Programas de 2026 vinculados pelo TSE. Consulte as páginas dos PDFs e os limites de cada recorte na tabela ou no relatório.','A cobertura independe das respostas do visitante. Não calculamos afinidade nem recomendamos voto.'])y=paragraph(ctx,text,P,y,CONTENT,32)+28;
+ const blob=await blobFrom(c);cache={session,revision:session.revision,blob};return blob;
+ }finally{c.width=1;c.height=1;}
 }
-function answerBlock(ctx,session,id,index) {
-  const p=proposalById[id];
-  const parts=[{text:`${index+1}. ${p.title}`,size:34,weight:700},{text:`Sua resposta: ${answerLabel(session.answersByQuestionId[id])}`,size:32,weight:600},{text:exclusion(p,session.answersByQuestionId[id]),size:28,weight:400}];
-  let height=30;
-  for(const part of parts){font(ctx,part.size,part.weight);part.lines=wrapText(ctx,part.text,CONTENT);height+=part.lines.length*part.size*1.4+10;}
-  return {id,parts,height};
-}
+function textBlock(ctx,text,id,heading=false){const size=heading?32:25,weight=heading?700:400;font(ctx,size,weight);const lines=wrapText(ctx,text,CONTENT);return {id,parts:[{text,size,weight,lines}],height:lines.length*size*1.4+24};}
 export function paginateBlocks(blocks,firstY,nextY=260,bottom=BOTTOM) {
   const pages=[[]];let y=firstY;
   for(const block of blocks) {
@@ -101,32 +83,19 @@ export function paginateBlocks(blocks,firstY,nextY=260,bottom=BOTTOM) {
   return pages;
 }
 export async function fullReportImages(session,proposals,onProgress=()=>{}) {
-  const images=await assets(),score=calculate(session,proposals),measure=canvas(),ctx=measure.getContext('2d');
-  if(!ctx) throw new Error('Canvas indisponível neste navegador.');
-  let firstY=resultHeader(ctx,score,images,152,true);
-  firstY=paragraph(ctx,`${levels[session.level].label} • ${session.questionOrder.length} perguntas • ${dateLabel(session)}`,P,firstY,CONTENT,28)+10;
-  firstY=paragraph(ctx,`Expectativa opcional: ${session.expectation || 'Não respondida'}`,P,firstY,CONTENT,30)+10;
-  firstY=paragraph(ctx,'Base histórica beta restrita; não representa intenção de voto. Itens excluídos são identificados abaixo.',P,firstY,CONTENT,28)+30;
-  const blocks=session.questionOrder.map((id,i)=>answerBlock(ctx,session,id,i));
-  const pages=paginateBlocks(blocks,firstY);measure.width=1;measure.height=1;
-  const files=[];
-  for(let i=0;i<pages.length;i++) {
-    onProgress(i+1,pages.length);const c=canvas(),context=c.getContext('2d');
-    try {
-      base(context,i+1,pages.length);let y;
-      if(i===0) {
-        y=resultHeader(context,score,images,152,true);
-        y=paragraph(context,`${levels[session.level].label} • ${session.questionOrder.length} perguntas • ${dateLabel(session)}`,P,y,CONTENT,28)+10;
-        y=paragraph(context,`Expectativa opcional: ${session.expectation || 'Não respondida'}`,P,y,CONTENT,30)+10;
-        y=paragraph(context,'Base histórica beta restrita; não representa intenção de voto. Itens excluídos são identificados abaixo.',P,y,CONTENT,28)+30;
-      } else { paragraph(context,'Suas respostas • continuação',P,145,CONTENT,38,700);paragraph(context,'Lula × Flávio Bolsonaro',P,205,CONTENT,28);y=260; }
-      for(const block of pages[i]) {
-        for(const part of block.parts) {font(context,part.size,part.weight);context.fillStyle=colors.ink;for(const line of part.lines){context.fillText(line,P,y);y+=part.size*1.4;}y+=10;}
-        y+=30;
-      }
-      files.push({name:`entre-pautas-pagina-${String(i+1).padStart(2,'0')}.png`,blob:await blobFrom(c),ids:pages[i].map(b=>b.id)});
-    } finally { c.width=1;c.height=1; }
-    await new Promise(resolve=>setTimeout(resolve,0));
-  }
-  return files;
+ const images=await assets(),comparison=compareDocuments(session,proposals),measure=canvas(),ctx=measure.getContext('2d');
+ if(!ctx)throw new Error('Canvas indisponível neste navegador.');
+ const firstY=resultHeader(ctx,comparison,images,152,true)+75;
+ const blocks=comparison.rows.flatMap((row,i)=>rowText(row,i).map((line,j)=>textBlock(ctx,(j?'Pergunta '+(i+1)+' • ':'')+line,row.proposal.id,j===0)));
+ const pages=paginateBlocks(blocks,firstY);measure.width=1;measure.height=1;const files=[];
+ for(let i=0;i<pages.length;i++){
+ onProgress(i+1,pages.length);const c=canvas(),context=c.getContext('2d');
+ try{base(context,i+1,pages.length);let y;
+ if(i===0){y=resultHeader(context,comparison,images,152,true);paragraph(context,'Programas TSE 2026; páginas e contexto a seguir.',P,y,CONTENT,25);y=firstY;}
+ else{paragraph(context,'Comparação factual • continuação',P,145,CONTENT,38,700);paragraph(context,'Lula × Flávio Bolsonaro • fontes e ressalvas',P,205,CONTENT,25);y=260;}
+ for(const block of pages[i]){for(const part of block.parts){font(context,part.size,part.weight);context.fillStyle=colors.ink;for(const line of part.lines){context.fillText(line,P,y);y+=part.size*1.4;}}y+=24;}
+ files.push({name:'entre-pautas-pagina-'+String(i+1).padStart(2,'0')+'.png',blob:await blobFrom(c),ids:[...new Set(pages[i].map(b=>b.id))]});
+ }finally{c.width=1;c.height=1;}
+ await new Promise(resolve=>setTimeout(resolve,0));
+ }return files;
 }
