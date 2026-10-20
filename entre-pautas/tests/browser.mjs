@@ -34,6 +34,18 @@ try{
     assert.equal(await page.locator('.comparison-table tbody tr').count(),count);
     assert.equal(await page.locator('.candidate-grid .portrait').count(),2);
     assert.equal(await page.locator('.percent').count(),0);
+    const accordion=page.locator('#review');
+    assert.equal(await accordion.evaluate(el=>el.tagName),'DETAILS');
+    assert.equal(await accordion.getAttribute('open'),null);
+    assert.equal(await page.locator('.comparison-table').isVisible(),false);
+    await accordion.locator('summary').focus();await page.keyboard.press('Enter');
+    assert.equal(await page.locator('.comparison-table').isVisible(),true);
+    await accordion.locator('summary').click();
+    assert.equal(await page.locator('.comparison-table').isVisible(),false);
+    const sharePosition=await page.locator('#sharing').boundingBox(),accordionPosition=await accordion.boundingBox();
+    assert(sharePosition.y+sharePosition.height<=accordionPosition.y);
+    const mainShare=await page.locator('#sharing [data-action=prepare-share]').boundingBox();
+    assert(mainShare.height>=64);assert(mainShare.width>sharePosition.width*.8);
     assert(!(await page.locator('h1').innerText()).includes('coincidências'));
     const expectedCoverage=await page.evaluate(async level=>{const {proposals,levels}=await import('/entre-pautas/data.js');const {compareDocuments}=await import('/entre-pautas/score.js');const {coverageText}=await import('/entre-pautas/report.js');return coverageText(compareDocuments({questionOrder:levels[level].ids,answersByQuestionId:{}},proposals));},level);
     assert.equal(await page.locator('.lead').innerText(),expectedCoverage);
@@ -64,7 +76,7 @@ try{
     await page.getByRole('button',{name:'Compartilhar nas redes',exact:true}).click();await page.getByText('Compartilhamento cancelado. Suas respostas foram mantidas.',{exact:true}).waitFor();assert.equal(await page.evaluate(()=>window.__shared),1);
     await page.evaluate(()=>{Object.defineProperty(navigator,'canShare',{configurable:true,value:()=>false});});await page.getByRole('button',{name:'Compartilhar nas redes',exact:true}).click();assert.equal(await sharing.locator('button').count(),4);
     for(const width of [320,430,1280]){await page.setViewportSize({width,height:900});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
-    await page.locator('#review').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,`tabela-${level}-desktop.png`)});
+    await accordion.locator('summary').click();await accordion.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,`tabela-${level}-desktop.png`)});
     await page.setViewportSize({width:375,height:812});await sharing.screenshot({path:path.join(out,`acoes-${level}.png`)});
     await page.getByRole('button',{name:'Revisar desde o início',exact:true}).click();assert.equal(await page.locator('h1').innerText(),order[0]);assert.equal(await page.getByRole('radio',{name:'A favor',exact:false}).getAttribute('aria-checked'),'true');
     await page.getByRole('button',{name:'Começar outra pesquisa',exact:true}).click();await page.getByRole('button',{name:'Apagar respostas e começar outra',exact:true}).click();

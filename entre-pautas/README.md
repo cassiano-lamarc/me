@@ -27,7 +27,7 @@ Posições documentadas exigem fonte HTTPS, data, resumo, contexto e conferênci
 
 Níveis aninhados de 10, 25 e 40 perguntas. Fisher–Yates é executado uma vez por sessão; IDs estáveis preservam as respostas ao voltar e revisar. Mais perguntas não garantem maior cobertura.
 
-O resultado mostra uma tabela com proposta, resposta escolhida e documentos de cada candidato, além das fotos com destaque equivalente. A tabela permite rolagem horizontal no celular. Fontes e ressalvas ficam visíveis em cada célula.
+O resultado mantém as fotos com destaque equivalente e apresenta a tabela dentro do acordeão “Propostas, respostas e documentos”, inicialmente fechado e operável por teclado. A tabela permite rolagem horizontal no celular. Fontes e ressalvas ficam visíveis em cada célula ao expandir. O painel de compartilhamento aparece antes do acordeão, com botão principal maior e em uma linha própria.
 
 As ações Compartilhar nas redes e Baixar imagem geram o resumo da cobertura com as duas fotos. Baixar TXT salva todas as perguntas, respostas, fontes e ressalvas. Baixar imagens completas gera um ZIP com páginas PNG do mesmo conteúdo factual. A paginação mantém a identificação da pergunta em cada bloco, inclusive quando uma pergunta ocupa mais de uma página. Todos usam compareDocuments, de score.js, sem fórmulas duplicadas. A expectativa opcional não altera o modelo nem aparece nas imagens.
 
