@@ -1,22 +1,21 @@
-import { candidates, CANONICAL_URL } from './candidates.js';
+import { candidates } from './candidates.js';
 import { proposals, proposalById, levels, options, expectations, answerLabel } from './data.js';
 import { createSession, answer } from './session.js';
 import { calculate, isComparable, exclusion } from './score.js';
 import { initDetails, openDetails } from './details.js';
 import { showAd } from './ads.js';
-import { textReport, summaryText, resultTitle, downloadBlob } from './report.js';
-import { socialImage, fullReportImages, invalidateSocial } from './export-image.js';
-import { zipFiles } from './zip.js';
-import { shareFile, nativeShare, canShareFile, copyText } from './share.js';
+import { summaryText, resultTitle, downloadBlob } from './report.js';
+import { socialImage, invalidateSocial } from './export-image.js';
+import { shareFile, nativeShare, canShareFile } from './share.js';
 const app=document.getElementById('app'), status=document.getElementById('status');
-let level='simple', session=null, screen='home', readyFile=null, reportFiles=[], busy=false;
+let level='simple', session=null, screen='home', readyFile=null, busy=false;
 const previewUrls=new Map();
 const esc=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const btn=(action,label,kind='secondary')=>`<button type="button" class="${kind}" data-action="${action}">${label}</button>`;
 const comparableCount=key=>levels[key].ids.filter(id=>isComparable(proposalById[id])).length;
 function notify(text){status.textContent=text;}
 function releaseUrls(scope){for(const [url,kind] of previewUrls){if(!scope||kind===scope){URL.revokeObjectURL(url);previewUrls.delete(url);}}}
-function releasePreviews(){releaseUrls();readyFile=null;reportFiles=[];}
+function releasePreviews(){releaseUrls();readyFile=null;}
 function objectUrl(blob,scope='social'){const url=URL.createObjectURL(blob);previewUrls.set(url,scope);return url;}
 function render(focus=true){
   releasePreviews();notify('');
@@ -43,12 +42,12 @@ function photo(c){return `<img class="portrait" data-portrait src="${c.photo}" a
 function sources(p){return candidates.map(c=>{const pos=p.positions[c.id];return `<div><p><strong>${c.name}:</strong> ${['favor','against'].includes(pos.stance)?answerLabel(pos.stance):'Sem evidência suficiente'} • conferência: ${esc(pos.verifiedAt||'pendente')}</p><p>${esc(pos.note||'')}</p><ul>${pos.sources.map(s=>`<li><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">${esc(s.title)}</a> • ${esc(s.date)}<br>${esc(s.summary)}</li>`).join('')}</ul></div>`;}).join('');}
 function renderResult(){
   const score=calculate(session,proposals);
-  app.innerHTML=`<p class="eyebrow">Seu mapa de coincidências</p><h1 class="result-title">${esc(resultTitle(score))}</h1><p class="lead">${!score.denominator?'Não houve respostas elegíveis para calcular percentuais. Você ainda pode revisar ou exportar suas respostas.':score.leaders.length===2?'Os dois tiveram o mesmo número de coincidências. Os percentuais são independentes e não precisam somar 100%.':'Este resultado descreve apenas coincidências com as propostas elegíveis que você respondeu.'}</p><p class="notice"><strong>Base ${score.denominator<5?'pequena':'utilizada'}: ${score.denominator} respostas elegíveis de ${session.questionOrder.length} perguntas.</strong> ${score.denominator<5?'Uma base tão restrita limita bastante a interpretação. ':''}Depende, Sem opinião e pautas exploratórias não entram no cálculo. Registros históricos não são promessas eleitorais atuais.</p><div class="candidate-grid">${score.results.map(c=>`<article class="candidate">${photo(c)}<h3>${c.name}</h3><span class="percent">${c.percent===null?'—':c.percent+'%'}</span><p>${c.count} de ${score.denominator} coincidências</p><p class="source-note">${esc(c.bio)}</p>${c.matches.length?`<ul>${c.matches.map(p=>`<li>${esc(p.category)}: ${esc(p.title)}<br>Sua resposta: ${answerLabel(session.answersByQuestionId[p.id])}</li>`).join('')}</ul>`:'<p class="source-note">Nenhuma coincidência elegível nesta sessão.</p>'}</article>`).join('')}</div><p class="source-note">Fotos: Lula — Ricardo Stuckert/PR, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>; Flávio Bolsonaro — Carlos Moura/Agência Senado, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Recortes no quadro. <a href="assets/candidates/ATTRIBUTION.md">Fontes das fotos</a>.</p><details class="panel"><summary>Ver divergências e como o cálculo funciona</summary>${score.results.map(c=>`<h3>${c.name}</h3>${c.divergences.length?`<ul>${c.divergences.map(p=>`<li>${esc(p.title)} — você: ${answerLabel(session.answersByQuestionId[p.id])}; registro: ${answerLabel(p.positions[c.id].stance)}</li>`).join('')}</ul>`:'<p>Nenhuma divergência elegível.</p>'}`).join('')}<p>Cada pauta elegível vale um ponto. Percentual = coincidências ÷ respostas elegíveis × 100. Ambos podem pontuar na mesma pauta. Valores arredondados ao inteiro mais próximo.</p></details><section class="panel"><h2>O resultado foi o que você esperava?</h2><label for="expectation" class="notice">Opcional. Fica só nesta sessão e não altera o cálculo.</label><select id="expectation" class="expectation"><option value="">Não respondida</option>${expectations.map(text=>`<option value="${esc(text)}" ${session.expectation===text?'selected':''}>${esc(text)}</option>`).join('')}</select><button type="button" class="text-button" data-action="clear-expectation">Limpar resposta opcional</button></section><section class="panel"><h2>Leve suas reflexões com você</h2><p>Baixe a imagem e publique no Instagram, TikTok ou onde preferir. O sistema do aparelho define os apps disponíveis.</p><div class="actions">${btn('social','Baixar resultado para redes','primary')}${btn('prepare-share','Compartilhar resultado')}</div><div id="social-preview" class="export-preview"></div><div class="actions">${btn('full','Baixar todas as respostas em imagem')}${btn('txt','Baixar respostas em TXT')}</div><div id="report-preview"></div><div class="actions">${btn('copy-link','Copiar link')}${btn('copy-summary','Copiar resumo')}</div><p class="notice">A imagem social omite sua expectativa opcional. O relatório completo e o TXT a incluem. O link nunca contém respostas.</p></section><details class="panel" id="review"><summary>Revisar todas as respostas e consultar fontes (${session.questionOrder.length})</summary>${session.questionOrder.map((id,i)=>{const p=proposalById[id];return `<article class="review-item"><h3>${i+1}. ${esc(p.title)}</h3><p><strong>Sua resposta: ${answerLabel(session.answersByQuestionId[id])}</strong></p><p>${exclusion(p,session.answersByQuestionId[id])}</p><button type="button" class="secondary" data-edit="${i}">Revisar esta resposta</button><details><summary>Fontes, datas e ressalvas</summary>${sources(p)}</details></article>`;}).join('')}</details><div class="actions">${btn('review','Revisar desde o início')}${btn('restart','Nova pesquisa')}</div>`;
+  app.innerHTML=`<p class="eyebrow">Seu mapa de coincidências</p><h1 class="result-title">${esc(resultTitle(score))}</h1><p class="lead">${!score.denominator?'Não houve respostas elegíveis para calcular percentuais. Você ainda pode revisar suas respostas ou baixar a imagem do resultado.':score.leaders.length===2?'Os dois tiveram o mesmo número de coincidências. Os percentuais são independentes e não precisam somar 100%.':'Este resultado descreve apenas coincidências com as propostas elegíveis que você respondeu.'}</p><p class="notice"><strong>Base ${score.denominator<5?'pequena':'utilizada'}: ${score.denominator} respostas elegíveis de ${session.questionOrder.length} perguntas.</strong> ${score.denominator<5?'Uma base tão restrita limita bastante a interpretação. ':''}Depende, Sem opinião e pautas exploratórias não entram no cálculo. Registros históricos não são promessas eleitorais atuais.</p><div class="candidate-grid">${score.results.map(c=>`<article class="candidate">${photo(c)}<h3>${c.name}</h3><span class="percent">${c.percent===null?'—':c.percent+'%'}</span><p>${c.count} de ${score.denominator} coincidências</p><p class="source-note">${esc(c.bio)}</p>${c.matches.length?`<ul>${c.matches.map(p=>`<li>${esc(p.category)}: ${esc(p.title)}<br>Sua resposta: ${answerLabel(session.answersByQuestionId[p.id])}</li>`).join('')}</ul>`:'<p class="source-note">Nenhuma coincidência elegível nesta sessão.</p>'}</article>`).join('')}</div><p class="source-note">Fotos: Lula — Ricardo Stuckert/PR, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>; Flávio Bolsonaro — Carlos Moura/Agência Senado, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>. Recortes no quadro. <a href="assets/candidates/ATTRIBUTION.md">Fontes das fotos</a>.</p><details class="panel"><summary>Ver divergências e como o cálculo funciona</summary>${score.results.map(c=>`<h3>${c.name}</h3>${c.divergences.length?`<ul>${c.divergences.map(p=>`<li>${esc(p.title)} — você: ${answerLabel(session.answersByQuestionId[p.id])}; registro: ${answerLabel(p.positions[c.id].stance)}</li>`).join('')}</ul>`:'<p>Nenhuma divergência elegível.</p>'}`).join('')}<p>Cada pauta elegível vale um ponto. Percentual = coincidências ÷ respostas elegíveis × 100. Ambos podem pontuar na mesma pauta. Valores arredondados ao inteiro mais próximo.</p></details><section class="panel" id="sharing"><h2>Compartilhe seu resultado</h2><p>Baixe a imagem e publique no Instagram, TikTok ou onde preferir. O sistema do aparelho define os apps disponíveis.</p><div class="actions">${btn('prepare-share','Compartilhar nas redes','primary')}${btn('social','Baixar imagem')}</div><div id="social-preview" class="export-preview"></div><p class="notice">A imagem não inclui sua resposta à pergunta opcional abaixo.</p></section><section class="panel"><h2>O resultado foi o que você esperava?</h2><label for="expectation" class="notice">Opcional. Fica só nesta sessão e não altera o cálculo.</label><select id="expectation" class="expectation"><option value="">Não respondida</option>${expectations.map(text=>`<option value="${esc(text)}" ${session.expectation===text?'selected':''}>${esc(text)}</option>`).join('')}</select><button type="button" class="text-button" data-action="clear-expectation">Limpar resposta opcional</button></section><details class="panel" id="review"><summary>Revisar todas as respostas e consultar fontes (${session.questionOrder.length})</summary>${session.questionOrder.map((id,i)=>{const p=proposalById[id];return `<article class="review-item"><h3>${i+1}. ${esc(p.title)}</h3><p><strong>Sua resposta: ${answerLabel(session.answersByQuestionId[id])}</strong></p><p>${exclusion(p,session.answersByQuestionId[id])}</p><button type="button" class="secondary" data-edit="${i}">Revisar esta resposta</button><details><summary>Fontes, datas e ressalvas</summary>${sources(p)}</details></article>`;}).join('')}</details><div class="actions">${btn('review','Revisar desde o início')}${btn('restart','Nova pesquisa')}</div>`;
 }
 async function withBusy(task){
   if(busy)return;busy=true;notify('Preparando imagem…');
   const controls=[...app.querySelectorAll('button,select')];controls.forEach(el=>{el.dataset.wasDisabled=String(el.disabled);el.disabled=true;});
-  try{await task();}catch{notify('Não foi possível concluir. Suas respostas foram mantidas. Tente novamente ou baixe o TXT.');}
+  try{await task();}catch{notify('Não foi possível concluir. Suas respostas foram mantidas. Tente novamente; suas respostas continuam disponíveis.');}
   finally{busy=false;controls.forEach(el=>{if(el.isConnected){el.disabled=el.dataset.wasDisabled==='true';delete el.dataset.wasDisabled;}});}
 }
 function previewSocial(blob){
@@ -57,8 +56,9 @@ function previewSocial(blob){
   const image=document.createElement('img');image.src=objectUrl(blob);image.alt='Prévia do resultado para redes, sem expectativa opcional.';
   container.replaceChildren(image);
   const p=document.createElement('p');p.className='notice';p.textContent='Prévia • 1080 × 1920. Confira antes de compartilhar.';container.append(p);
-  if(navigator.share){const share=document.createElement('button');share.className='primary';share.type='button';share.dataset.action='share-ready';share.textContent=canShareFile(readyFile)?'Compartilhar imagem pronta':'Compartilhar somente o link';container.append(share);}
-  else {const p=document.createElement('p');p.textContent='Compartilhamento nativo indisponível. Use Copiar link, Copiar resumo ou baixe a imagem para publicar.';container.append(p);}
+  const help=document.createElement('p');help.className='notice';
+  help.textContent=canShareFile(readyFile)?'Imagem pronta. Toque novamente em “Compartilhar nas redes” para escolher um app.':'Seu aparelho não permite compartilhar esta imagem diretamente. Use “Baixar imagem” e publique no app de sua preferência.';
+  container.append(help);
 }
 async function act(action,trigger){
   if(busy)return;
@@ -69,30 +69,21 @@ async function act(action,trigger){
   if(action==='restart'){openRestart(trigger);}
   if(action==='confirm-restart'){document.getElementById('details').close();session=null;invalidateSocial();screen='home';render();}
   if(action==='review'){screen='quiz';session.index=0;render();}
-  if(action==='clear-expectation'){session.expectation='';document.getElementById('expectation').value='';clearFullPreview();notify('Resposta opcional removida.');}
-  if(action==='txt'){downloadBlob(new Blob(['\ufeff',textReport(session,proposals)],{type:'text/plain;charset=utf-8'}),'entre-pautas-respostas.txt');notify('TXT preparado com todas as respostas e fontes.');}
-  if(action==='social'||action==='prepare-share')await withBusy(async()=>{const blob=await socialImage(session,proposals);previewSocial(blob);if(action==='social')downloadBlob(blob,'entre-pautas-resultado.png');notify(action==='social'?'Imagem preparada para baixar.':'Imagem pronta. Confira a prévia e toque novamente para compartilhar.');});
-  if(action==='share-ready'&&readyFile){
-    // O gesto deste segundo toque chama navigator.share sem aguardar renderização.
-    try{const result=await nativeShare(readyFile,summaryText(session,proposals));notify(result==='cancelled'?'Compartilhamento cancelado. Suas respostas foram mantidas.':result==='unsupported'?'Use as opções de copiar ou baixar.':'Compartilhamento concluído.');}catch{notify('O aparelho não conseguiu compartilhar. Use Copiar link ou baixe a imagem.');}
+  if(action==='clear-expectation'){session.expectation='';document.getElementById('expectation').value='';notify('Resposta opcional removida.');}
+  if(action==='prepare-share'&&readyFile){
+    if(!canShareFile(readyFile)){notify('Use “Baixar imagem” e publique no app de sua preferência.');return;}
+    // Segundo toque abre a folha nativa diretamente no gesto do usuário.
+    try{const result=await nativeShare(readyFile,summaryText(session,proposals));notify(result==='cancelled'?'Compartilhamento cancelado. Suas respostas foram mantidas.':'Compartilhamento concluído.');}catch{notify('O aparelho não conseguiu compartilhar. Use “Baixar imagem” para publicar.');}
+    return;
   }
-  if(action==='full')await withBusy(async()=>{
-    clearFullPreview();reportFiles=await fullReportImages(session,proposals,(i,total)=>notify(`Preparando imagem… página ${i} de ${total}`));
-    const target=document.getElementById('report-preview'),heading=document.createElement('h3');heading.textContent=`Relatório pronto • ${reportFiles.length} página(s)`;target.append(heading);
-    const pages=document.createElement('div');pages.className='export-pages';
-    for(const [i,file] of reportFiles.entries()){const figure=document.createElement('figure'),img=document.createElement('img'),a=document.createElement('a');const url=objectUrl(file.blob,'report');img.src=url;img.alt=`Prévia da página ${i+1} de ${reportFiles.length}`;a.href=url;a.download=file.name;a.textContent=`Baixar página ${i+1}`;figure.append(img,a);pages.append(figure);}
-    target.append(pages);
-    if(reportFiles.length>1){const zip=await zipFiles(reportFiles),a=document.createElement('a');a.href=objectUrl(zip,'report');a.download='entre-pautas-relatorio.zip';a.className='primary';a.textContent='Baixar todas as páginas em ZIP';target.append(a);}
-    notify('Relatório pronto. Confira as prévias e escolha o ZIP ou uma página para baixar.');
+  if(action==='social'||action==='prepare-share')await withBusy(async()=>{
+    const blob=await socialImage(session,proposals);previewSocial(blob);
+    if(action==='social')downloadBlob(blob,'entre-pautas-resultado.png');
+    notify(action==='social'?'Imagem preparada para baixar.':'Imagem pronta. Confira a prévia e toque novamente em “Compartilhar nas redes”.');
   });
-  if(action==='copy-link'||action==='copy-summary'){
-    const text=action==='copy-link'?CANONICAL_URL:summaryText(session,proposals);
-    if(await copyText(text))notify('Copiado.');else{openDetails('Copie o texto abaixo',[text],trigger,'Fechar');notify('A cópia automática não está disponível. Selecione o texto no painel.');}
-  }
 }
-function clearFullPreview(){releaseUrls('report');reportFiles=[];document.getElementById('report-preview')?.replaceChildren();}
 function openRestart(trigger){
-  openDetails('Começar outra pesquisa?',['Isso encerra a sessão atual e apaga suas respostas desta aba. Baixe um relatório antes, se quiser guardar uma cópia.'],trigger,'Continuar nesta pesquisa');
+  openDetails('Começar outra pesquisa?',['Isso encerra a sessão atual e apaga suas respostas desta aba. Baixe a imagem antes, se quiser guardar o resultado.'],trigger,'Continuar nesta pesquisa');
   const button=document.createElement('button');button.type='button';button.className='secondary';button.dataset.action='confirm-restart';button.textContent='Apagar respostas e começar outra';document.getElementById('dialog-body').append(button);
 }
 document.addEventListener('click',event=>{
@@ -113,7 +104,7 @@ document.addEventListener('click',event=>{
     'Respostas e expectativa opcional ficam apenas na memória desta aba. Não usamos localStorage, cookies, analytics, login ou APIs para registrar ou calcular opiniões políticas. Fechar ou recarregar encerra a sessão.',
     'Fotos e fontes tipográficas são arquivos locais. O servidor de hospedagem recebe as requisições normais de arquivos e pode tratar dados técnicos de acesso conforme suas próprias políticas; as respostas não são incluídas em URLs, logs da aplicação ou requisições.',
     'Publicidade está desativada. Nenhum script do Google é carregado por esta aplicação. Uma ativação futura exige revisão de privacidade, aprovação e consentimento aplicável; a rede de anúncios poderá receber dados técnicos, nunca respostas ou scores para segmentação.',
-    'Exportar, copiar e compartilhar são ações suas. Arquivos baixados e apps escolhidos recebem o conteúdo que você decidir compartilhar. A imagem social omite a expectativa; o relatório completo e o TXT a incluem.',
+    'Baixar e compartilhar são ações suas. A imagem e os apps escolhidos recebem o resultado somente por sua ação. A resposta à pergunta opcional não aparece na imagem.',
     'Abrir fontes ou canais de contato leva a serviços externos. Os links das evidências não enviam o endereço de origem como referenciador. Para contato, use o site pessoal ou o Instagram abaixo.'
   ],target,'Fechar');
     const links=document.createElement('ul');links.className='link-list';
@@ -124,6 +115,6 @@ document.addEventListener('click',event=>{
     document.getElementById('dialog-body').append(links);
   }
 });
-app.addEventListener('change',event=>{if(event.target.id==='expectation'){session.expectation=expectations.includes(event.target.value)?event.target.value:'';clearFullPreview();}});
+app.addEventListener('change',event=>{if(event.target.id==='expectation'){session.expectation=expectations.includes(event.target.value)?event.target.value:'';}});
 app.addEventListener('keydown',event=>{const radio=event.target.closest('[data-answer]');if(!radio||!['ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const buttons=[...app.querySelectorAll('[data-answer]')],index=buttons.indexOf(radio);const next=event.key==='Home'?0:event.key==='End'?3:(index+(['ArrowDown','ArrowRight'].includes(event.key)?1:3))%4;buttons[next].focus();buttons[next].click();});
 initDetails();render(false);

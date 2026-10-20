@@ -48,8 +48,9 @@ function base(ctx,page,total) {
   ctx.fillStyle=colors.line;ctx.fillRect(P,1730,CONTENT,2);
   let y=1754;
   y=paragraph(ctx,'Coincidência de propostas. Não é recomendação de voto.',P,y,CONTENT,24);
-  y=paragraph(ctx,'cassianolamarc.com.br/entre-pautas/ • Cassiano Lamarc',P,y+5,CONTENT,22);
-  y=paragraph(ctx,'Fotos: Ricardo Stuckert/PR • CC BY 2.0; Carlos Moura/Ag. Senado • CC BY-SA 4.0',P,y+5,CONTENT,18);
+  y=paragraph(ctx,'@cassianolamarc • cassianolamarc.com.br',P,y+5,CONTENT,26,700);
+  y=paragraph(ctx,'Desenvolvido por Cassiano Lamarc • cassianolamarc.com.br/entre-pautas/',P,y+5,CONTENT,18);
+  y=paragraph(ctx,'Fotos: Ricardo Stuckert/PR • CC BY 2.0; Carlos Moura/Ag. Senado • CC BY-SA 4.0',P,y+5,CONTENT,16);
   paragraph(ctx,`Página ${page} de ${total} • composição exportada CC BY-SA 4.0`,P,y+5,CONTENT,18);
 }
 function resultHeader(ctx,score,images,start=152,compact=false) {

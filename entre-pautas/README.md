@@ -2,6 +2,8 @@
 
 Aplicação estática em `/entre-pautas/`, integrada ao site existente de Cassiano Lamarc. HTML/CSS/JavaScript nativos, sem build, servidor de aplicação, banco ou dependência de execução. A home recebeu apenas um link no rodapé; `CNAME` e a hospedagem existente foram preservados.
 
+**Interface atual:** o resultado oferece somente **Compartilhar nas redes** e **Baixar imagem**. A expectativa opcional aparece depois dessas ações e não entra no PNG. A imagem inclui `@cassianolamarc` e `cassianolamarc.com.br`. O primeiro toque prepara a prévia; o seguinte abre o compartilhamento de arquivo quando suportado. Nos demais aparelhos, a alternativa é baixar a imagem. Não há ações de copiar, compartilhar link, TXT ou relatório completo na interface. Os utilitários internos de TXT/relatório/ZIP descritos abaixo permanecem no código, sem exposição no produto.
+
 ## Executar e verificar
 
 Sirva a raiz do repositório por HTTP e abra `/entre-pautas/`. Módulos ES precisam de um servidor HTTP; abrir `index.html` por `file://` não funciona. Não há instalação necessária para publicar.
@@ -65,7 +67,7 @@ Referências oficiais consultadas em 20/10/2026: [Web Share](https://developer.m
 
 `npm test`: 8 testes de comportamento para níveis, IDs, shuffle, preservação, pontuação incluindo coincidência com ambos, empate/zero/exclusões, expectativa/TXT, paginação/quebra, ZIP, share/clipboard e AdSense com mocks.
 
-`npm run test:browser`: Chrome headless, servidor sob subdiretório; fluxo completo de 10/25/40 perguntas; revisão e expectativas; foco/Escape; PNGs sem texto fora do canvas; TXT/ZIP baixados; fontes e fotos carregadas; cancelamento de share e falhas simuladas de fotos/exportação; ausência de requisições externas, cookies e armazenamento. Relatórios de 10/25/40 produziram 3/6/9 páginas nos cenários testados. ZIPs abertos também com `System.IO.Compression.ZipFile`.
+`npm run test:browser`: Chrome headless, servidor sob subdiretório; fluxo completo de 10/25/40 perguntas; revisão, foco/Escape e navegação mantendo a pergunta visível; somente duas ações de saída; expectativa abaixo do compartilhamento e ausente no PNG; site e Instagram no PNG, sem texto fora do canvas; download, compartilhamento nativo cancelado e alternativa por download; ausência de requisições externas, cookies e armazenamento. Os testes internos de TXT/ZIP/paginação continuam em `npm test`, sem botões para essas funções na interface atual.
 
 Capturas em 320, 375, 430 e 1280 px; inspeção visual da entrada, pergunta, resultado e relatório. A referência `meu-alinhamento.cacassiano2011911719.chatgpt.site` não abriu neste ambiente, portanto os tokens e padrões do documento fornecido foram usados. Não houve teste em aparelho físico nem envio a Instagram/TikTok; a disponibilidade de apps e o compartilhamento nativo dependem do dispositivo.
 
