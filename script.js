@@ -6,6 +6,7 @@ const services = [
   { icon:"MAP",title:"Consultoria e estrutura digital",problem:"Há muitas ferramentas, mas falta um plano conectado.",solution:"Diagnóstico de processos, planejamento digital e estrutura tecnológica para atendimento, leads e campanhas.",benefit:"Decisões mais claras e investimento direcionado ao que realmente gera valor." }
 ];
 const projects = [
+  {title:"Entre Pautas",segment:"Informação política",type:"Projeto online · beta",text:"Experiência interativa para refletir sobre propostas e comparar respostas com registros públicos de Lula e Flávio Bolsonaro, com fontes, metodologia e exportação de resultados.",image:"assets/projects/entre-pautas.svg",link:"entre-pautas/"},
   {title:"HardApply",segment:"Produto digital",type:"Projeto online",text:"Sistema para organizar candidaturas, entrevistas, currículos e notificações, reunindo front-end, back-end, autenticação, banco de dados e automações.",image:"https://hardapply.com.br/assets/brand/hard-apply-logo.png",link:"https://hardapply.com.br/"},
   {title:"MV Eletrodiesel",segment:"Serviços automotivos",type:"Em breve",text:"Site empresarial para apresentar serviços de injeção diesel, experiência, localização e contato para orçamento.",image:"assets/projects/em-breve.png",link:""},
   {title:"Luiz Envelopamento",segment:"Envelopamento",type:"Projeto realizado",text:"Site e portfólio comercial para destacar trabalhos, áreas atendidas e facilitar o contato com a empresa.",image:"assets/projects/luiz-envelopamento-hero.png",link:"https://luizenvelopamento.com.br/",external:true},
