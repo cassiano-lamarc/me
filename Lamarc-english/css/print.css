@@ -1,0 +1,4 @@
+@page{size:A4;margin:18mm}
+.Lamarc-english{background:white;color:#000;font:11pt/1.5 Arial,sans-serif;min-width:0}
+.Lamarc-english .header,.Lamarc-english footer,.Lamarc-english .status,.Lamarc-english .skip,.Lamarc-english .no-print{display:none!important}
+.Lamarc-english main{padding:0;max-width:none;min-height:0}.Lamarc-english .report-only{display:block}.Lamarc-english .card{border:0;padding:0;margin:12pt 0;box-shadow:none;background:white;color:#000}.Lamarc-english .dark p{color:#000}.Lamarc-english h1{font-size:26pt;letter-spacing:0}.Lamarc-english h2{font-size:18pt}.Lamarc-english .result-level{font-size:32pt;letter-spacing:0}.Lamarc-english .notice{background:none;border-color:#555}.Lamarc-english tr,.Lamarc-english .notice,.Lamarc-english h2{break-inside:avoid}.Lamarc-english h2,.Lamarc-english h3{break-after:avoid}.Lamarc-english table{font-size:11pt}.Lamarc-english .muted{color:#333}.Lamarc-english a{text-decoration:none}
