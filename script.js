@@ -6,6 +6,7 @@ const services = [
   { icon:"MAP",title:"Consultoria e estrutura digital",problem:"Há muitas ferramentas, mas falta um plano conectado.",solution:"Diagnóstico de processos, planejamento digital e estrutura tecnológica para atendimento, leads e campanhas.",benefit:"Decisões mais claras e investimento direcionado ao que realmente gera valor." }
 ];
 const projects = [
+  {title:"GHÊ GHÊ",segment:"Música",type:"Projeto realizado",text:"Site oficial do cantor GHÊ GHÊ, com biografia, agenda, vídeos e contato para contratação de shows.",image:"assets/projects/ghe-ghe.jpg",link:"/gg/"},
   {title:"Lamarc English",segment:"Educação",type:"Projeto realizado",text:"Avaliação gratuita de inglês escrito com questões de leitura, gramática e vocabulário, resultado indicativo por nível, revisão de respostas e exportação para imagem ou impressão.",image:"assets/projects/lamarc-english.svg",link:"Lamarc-english/"},
   {title:"Entre Pautas",segment:"Informação política",type:"Projeto online · beta",text:"Experiência interativa para refletir sobre propostas e comparar respostas com registros públicos de Lula e Flávio Bolsonaro, com fontes, metodologia e exportação de resultados.",image:"assets/projects/entre-pautas.svg",link:"entre-pautas/"},
   {title:"HardApply",segment:"Produto digital",type:"Projeto online",text:"Sistema para organizar candidaturas, entrevistas, currículos e notificações, reunindo front-end, back-end, autenticação, banco de dados e automações.",image:"https://hardapply.com.br/assets/brand/hard-apply-logo.png",link:"https://hardapply.com.br/"},
